@@ -5,11 +5,12 @@ Bootstrap Cluster for MPI
 
 ## Requirements
 
-- Vagrant
-- Docker
-- VirtualBox
-- ruby, bundler
-- pdsh
+- [Vagrant](http://www.vagrantup.com)
+- [Docker](http://www.docker.com)
+- [VirtualBox](https://www.virtualbox.org)
+- [Packer](http://www.packer.io)
+- [Ruby](https://www.ruby-lang.org), [Bundler](http://bundler.io)
+- [pdsh](https://code.google.com/p/pdsh)
 
 ## Setup
 
@@ -23,12 +24,6 @@ $ cluster init
 
 ```
 $ cluster up
-$ vagrant ssh mpi0
-$ cp -r /usr/local/mpispec/sample /data/
-$ cd /data/sample
-$ mpispec -np 3 --allow-run-as-root --hostfile /data/hostfile
-```
-
-```
+$ cluster deploy -s
 $ cluster halt
 ```

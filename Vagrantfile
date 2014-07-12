@@ -23,8 +23,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       chef.add_role 'nfs'
     end
   end
-  
-  
+
+
   config.vm.define 'mpi0' do |v|
     v.vm.hostname = 'mpi0'
     v.vm.provider 'docker' do |d|
@@ -38,8 +38,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-  
-  
+
+
   config.vm.define 'mpi1' do |v|
     v.vm.hostname = 'mpi1'
     v.vm.provider 'docker' do |d|
@@ -53,8 +53,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-  
-  
+
+
   config.vm.define 'mpi2' do |v|
     v.vm.hostname = 'mpi2'
     v.vm.provider 'docker' do |d|
@@ -68,8 +68,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-  
-  
+
+
   config.vm.define 'mpi3' do |v|
     v.vm.hostname = 'mpi3'
     v.vm.provider 'docker' do |d|
@@ -83,5 +83,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-  
+
 end
