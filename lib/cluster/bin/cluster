@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'cluster'
+  require 'cluster/cli'
+rescue
+  require 'rubygems'
+  require 'cluster'
+  require 'cluster/cli'
+end
+
+include Cluster::Validator
+
+Cli.start

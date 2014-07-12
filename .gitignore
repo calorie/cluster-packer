@@ -1,0 +1,14 @@
+.bundle
+.vagrant
+.cluster
+
+insecure_key
+Gemfile.lock
+Berksfile.lock
+cookbooks
+vendor/bundle
+*.log
+chef-repo/nodes/*.json
+!chef-repo/nodes/mpi.json
+chef-repo/nodes/*.json
+!chef-repo/nodes/nfs.json

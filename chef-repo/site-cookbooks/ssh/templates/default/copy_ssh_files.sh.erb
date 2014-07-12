@@ -1,0 +1,30 @@
+#!/bin/sh
+
+user_home=<%= @user_home %>
+ssh_home=${user_home}/.ssh
+server_ip=<%= @server_ip %>
+mount_dir=<%= @mount_dir %>
+hostname=`hostname`
+ip=`hostname -I`
+keys_dir=${mount_dir}/keys
+configs_dir=${mount_dir}/configs
+public_key=${keys_dir}/${hostname}.pub
+config=${configs_dir}/${hostname}
+ssh_config=${ssh_home}/config
+
+if ! mountpoint -q $mount_dir ; then
+  mount -t nfs -o rw,proto=tcp,port=2049 ${server_ip}:${mount_dir} $mount_dir
+fi
+
+[ -d $keys_dir ] || mkdir $keys_dir
+[ -d $configs_dir ] || mkdir $configs_dir
+
+if [ ! -f $public_key ]; then
+  cp ${ssh_home}/id_rsa.pub $public_key
+fi
+
+if [ ! -f $config ]; then
+  [ -f $ssh_config ] && rm -f $ssh_config
+  printf "Host ${hostname}\n  HostName ${ip}\n" > $ssh_config
+  cp ${ssh_config} $config
+fi

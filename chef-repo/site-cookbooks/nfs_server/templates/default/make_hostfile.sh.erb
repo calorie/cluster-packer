@@ -1,0 +1,12 @@
+#!/bin/sh
+
+mount_dir=<%= @mount_dir %>
+configs_dir=${mount_dir}/configs
+configs=${configs_dir}/*
+hostfile=${mount_dir}/hostfile
+
+if ls $configs &> /dev/null; then
+  [ -f $hostfile ] || touch $hostfile
+  cd $configs_dir
+  ls -1 >> $hostfile
+fi

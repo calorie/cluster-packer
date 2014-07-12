@@ -1,0 +1,10 @@
+#!/bin/sh
+
+mount_dir=<%= @mount_dir %>
+keys_dir=${mount_dir}/keys
+configs_dir=${mount_dir}/configs
+hostfile=${mount_dir}/hostfile
+
+rm -f ${keys_dir}/*
+rm -f ${configs_dir}/*
+rm -f ${hostfile}

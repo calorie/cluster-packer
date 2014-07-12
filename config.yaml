@@ -1,0 +1,25 @@
+:staging:
+  :node_num: 4
+  :login_user: 'root'
+  :nfs:
+    :ip: '192.168.33.10'
+:production:
+  :login_user: 'root'
+  :nfs:
+    :ip: '192.168.100.119'
+    :host: 'nfs'
+  :mpi:
+    -
+      :ip: '192.168.100.120'
+      :host: 'mpi0'
+    -
+      :ip: '192.168.100.123'
+      :host: 'mpi1'
+    -
+      :ip: '192.168.100.133'
+      :host: 'mpi2'
+:deploy:
+  :protcol: 'git'
+  :repository: 'https://bitbucket.org/calorie/sample.git'
+  :path: '/data/sample'
+  :test_cmd: 'mpispec -np 3 --allow-run-as-root --hostfile /data/hostfile'
