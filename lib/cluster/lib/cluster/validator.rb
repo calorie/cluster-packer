@@ -5,32 +5,34 @@ module Cluster
     module_function
 
     def docker?
-      unless find_executable('docker')
-        puts '`docker` command is not found.'
-        exit 1
-      end
-      true
+      command?('docker')
     end
 
     def pdsh?
-      unless find_executable('pdsh')
-        puts '`pdsh` command is not found.'
-        exit 1
-      end
-      true
+      command?('pdsh')
     end
 
     def vagrant?
-      unless find_executable('vagrant')
-        puts '`vagrant` command is not found.'
-        exit 1
-      end
-      true
+      command?('vagrant')
+    end
+
+    def packer?
+      command?('packer')
     end
 
     def config?
       unless File.exist?('config.yaml')
         puts 'config.yaml is not found.'
+        exit 1
+      end
+      true
+    end
+
+    private
+
+    def command?(command)
+      unless find_executable(command)
+        puts "`#{command}` command is not found."
         exit 1
       end
       true

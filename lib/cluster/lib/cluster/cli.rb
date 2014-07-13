@@ -65,6 +65,7 @@ class Cli < Thor
     docker?
     pdsh?
     vagrant?
+    packer?
     config?
     @@config = YAML.load_file('config.yaml')
   end
