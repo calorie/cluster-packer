@@ -12,24 +12,56 @@ configs=${configs_dir}/*
 authorized_keys=${ssh_home}/authorized_keys
 config=${ssh_home}/config
 
-if ls $keys &> /dev/null; then
+init_authorized_keys()
+{
+  local authorized_keys=$1
+  local user=$2
   if [ ! -f $authorized_keys ]; then
     touch $authorized_keys
     chmod 600 $authorized_keys
     chown ${user}:${user} $authorized_keys
   fi
-  cat $keys |
+}
+
+init_config()
+{
+  local config=$1
+  local user=$2
+  [ -f $config ] && rm -f $config
+  touch $config
+  chmod 600 $config
+  chown ${user}:${user} $config
+}
+
+add_key()
+{
+  for k in $*; do
+    cat $k |
     while read -r ktype key comment; do
       if ! (grep -Fw "$ktype $key" $authorized_keys | grep -qsvF "^#"); then
         echo "$ktype $key $comment" >> $authorized_keys
       fi
     done
+  done
+}
+
+init_authorized_keys $authorized_keys $user
+
+if [ -z "$*" ]; then
+  if ls $keys &> /dev/null; then
+    add_key $keys
+  fi
+else
+  hosts=$*
+  for host in $hosts; do
+    target_key=${keys_dir}/${host}.pub
+    if [ -f $target_key ]; then
+      add_key $target_key
+    fi
+  done
 fi
 
 if ls $configs &> /dev/null; then
-  [ -f $config ] && rm -f $config
-  touch $config
-  chmod 600 $config
+  init_config $config $user
   cat $configs >> $config
-  chown ${user}:${user} $config
 fi

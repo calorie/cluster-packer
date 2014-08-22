@@ -12,7 +12,7 @@ class Cli < Thor
   method_option :vagrant,   type: :boolean, aliases: '-v', banner: 'Init Vagrantfile'
   method_option :packer,    type: :boolean, aliases: '-P', banner: 'Create MPI node image'
   def init
-    config = platform_config(options[:production])
+    config = setup_config(options[:production])
     i = Initializer.new(config, options)
     if init_all?(options)
       i.bootstrap
@@ -29,7 +29,7 @@ class Cli < Thor
   method_option :mpi,     type: :boolean, aliases: '-m', banner: 'Up mpi containers'
   method_option :network, type: :boolean, aliases: '-N', banner: 'Setup network'
   def up
-    config = platform_config(options[:production])
+    config = setup_config(options[:production])
     u = Upper.new(config, options)
     if up_all?(options)
       u.up
@@ -41,10 +41,10 @@ class Cli < Thor
   end
 
   desc 'halt', 'Halt cluster'
-  method_option :nfs,   type: :boolean, aliases: '-n', banner: 'Halt nfs VM'
-  method_option :mpi,   type: :boolean, aliases: '-m', banner: 'Halt mpi containers'
+  method_option :nfs, type: :boolean, aliases: '-n', banner: 'Halt nfs VM'
+  method_option :mpi, type: :boolean, aliases: '-m', banner: 'Halt mpi containers'
   def halt
-    config = platform_config(options[:production])
+    config = setup_config(options[:production])
     d = Downer.new(config, options)
     if down_all?(options)
       d.down
@@ -72,8 +72,12 @@ class Cli < Thor
 
   private
 
-  def platform_config(production)
-    production ? @@config[:production] : @@config[:staging]
+  def setup_config(production)
+    config = production ? @@config[:production] : @@config[:staging]
+    @@config[:network] = {} unless @@config[:network].is_a?(Hash)
+    config[:network] = {} unless config[:network].is_a?(Hash)
+    config[:network] = @@config[:network].merge(config[:network])
+    config
   end
 
   def init_all?(options)

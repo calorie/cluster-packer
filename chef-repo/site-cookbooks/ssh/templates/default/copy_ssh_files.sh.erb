@@ -20,6 +20,7 @@ fi
 [ -d $configs_dir ] || mkdir $configs_dir
 
 if [ ! -f $public_key ]; then
+  echo -e 'y' | ssh-keygen -q -f ${ssh_home}/id_rsa -t rsa -N '' > /dev/null
   cp ${ssh_home}/id_rsa.pub $public_key
 fi
 
