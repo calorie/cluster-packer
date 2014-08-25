@@ -6,26 +6,23 @@
 :production:
   :login_user: 'root'
   :nfs:
-    :ip: '192.168.100.119'
+    :ip: '192.168.100.190'
     :host: 'nfs'
   :mpi:
     -
-      :ip: '192.168.100.120'
+      :ip: '192.168.100.191'
       :host: 'mpi0'
     -
-      :ip: '192.168.100.123'
+      :ip: '192.168.100.192'
       :host: 'mpi1'
     -
-      :ip: '192.168.100.133'
+      :ip: '192.168.100.193'
       :host: 'mpi2'
+    -
+      :ip: '192.168.100.194'
+      :host: 'mpi3'
 :deploy:
   :protcol: 'git'
   :repository: 'https://bitbucket.org/calorie/sample.git'
   :path: '/data/sample'
   :test_cmd: 'mpispec -np 4 --allow-run-as-root --hostfile /data/hostfile'
-:network:
-  :mpi0:
-    - 'mpi1'
-    - 'mpi2'
-  :mpi1:
-    - 'mpi0'
