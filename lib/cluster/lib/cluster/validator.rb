@@ -20,14 +20,6 @@ module Cluster
       command?('packer')
     end
 
-    def config?
-      unless File.exist?('config.yaml')
-        puts 'config.yaml is not found.'
-        exit 1
-      end
-      true
-    end
-
     private
 
     def command?(command)

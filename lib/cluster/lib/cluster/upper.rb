@@ -1,6 +1,6 @@
 class Upper
-  def initialize(config, options = {})
-    @config  = config
+  def initialize(configure, options = {})
+    @configure  = configure
     @options = options
   end
 
@@ -11,7 +11,7 @@ class Upper
   end
 
   def nfs
-    nfs = Nfs.new(@config, @options)
+    nfs = Nfs.new(@configure, @options)
     if @options[:production]
       nfs.up_production
     else
@@ -20,7 +20,7 @@ class Upper
   end
 
   def mpi
-    mpi = Mpi.new(@config, @options)
+    mpi = Mpi.new(@configure, @options)
     if @options[:production]
       mpi.up_production
     else
@@ -29,7 +29,7 @@ class Upper
   end
 
   def network
-    network = Network.new(@config, @options)
+    network = Network.new(@configure, @options)
     if @options[:production]
       network.up_production
     else

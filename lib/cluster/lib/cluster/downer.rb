@@ -1,7 +1,7 @@
 class Downer
-  def initialize(config, options = {})
-    @config  = config
-    @options = options
+  def initialize(configure, options = {})
+    @configure = configure
+    @options   = options
   end
 
   def down
@@ -10,7 +10,7 @@ class Downer
   end
 
   def nfs
-    nfs = Nfs.new(@config, @options)
+    nfs = Nfs.new(@configure, @options)
     if @options[:production]
       nfs.halt_production
     else
@@ -19,7 +19,7 @@ class Downer
   end
 
   def mpi
-    mpi = Mpi.new(@config, @options)
+    mpi = Mpi.new(@configure, @options)
     if @options[:production]
       mpi.halt_production
     else

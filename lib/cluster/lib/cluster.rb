@@ -1,6 +1,7 @@
 require 'cluster/base'
 require 'cluster/validator'
 require 'cluster/initializer'
+require 'cluster/configure'
 require 'cluster/upper'
 require 'cluster/downer'
 require 'cluster/nfs'

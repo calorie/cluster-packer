@@ -1,6 +1,6 @@
 class Nfs
-  def initialize(config, options)
-    @config  = config
+  def initialize(configure, options)
+    @config  = configure.env_config
     @options = options
   end
 

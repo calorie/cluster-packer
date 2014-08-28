@@ -1,10 +1,10 @@
 require 'fileutils'
 
 class Deployer
-  def initialize(project, config, options = {})
-    @staging    = config[:staging]
-    @production = config[:production]
-    @deploy     = config[:deploy]
+  def initialize(project, configure, options = {})
+    @staging    = configure.staging
+    @production = configure.production
+    @deploy     = configure.deploy
     @project    = File.expand_path(@deploy[:repository] || project)
     @options    = options
   end

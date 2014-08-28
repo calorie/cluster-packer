@@ -1,8 +1,9 @@
 require 'json'
 
 class Network
-  def initialize(config, options)
-    @config  = config
+  def initialize(configure, options)
+    @config  = configure.env_config
+    @network = configure.network || {}
     @options = options
     @user    = @config[:login_user]
     @home    = @user == 'root' ? '/root' : File.join('/home', @user)
@@ -70,7 +71,7 @@ class Network
   end
 
   def setup_linking_hosts(host, hosts, ip_and_host_maps)
-    linked_hosts = @config[:network][host.to_sym] || hosts
+    linked_hosts = @network[host.to_sym] || hosts
     if linked_hosts.is_a?(Array) && !linked_hosts.empty? && !host.nil?
       linked_hosts << host
       linked_ips_or_hosts = linked_hosts.map do |h|
@@ -79,9 +80,9 @@ class Network
       end
       return false unless link_hosts(host, linked_ips_or_hosts.join(','))
     else
-      puts 'Please specify `host` in config.yaml.' if host.nil?
+      puts 'Please specify `host` in the config file.' if host.nil?
       if !linked_hosts.is_a?(Array) || linked_hosts.empty?
-        puts 'Please specify networking hosts with Array in config.yaml.'
+        puts 'Please specify networking hosts with Array in the config file.'
       end
       return false
     end

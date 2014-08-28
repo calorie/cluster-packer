@@ -12,8 +12,8 @@ class Cli < Thor
   method_option :vagrant,   type: :boolean, aliases: '-v', banner: 'Init Vagrantfile'
   method_option :packer,    type: :boolean, aliases: '-P', banner: 'Create MPI node image'
   def init
-    config = setup_config(options[:production])
-    i = Initializer.new(config, options)
+    @@configure.production = options[:production]
+    i = Initializer.new(@@configure, options)
     if init_all?(options)
       i.bootstrap
     else
@@ -29,8 +29,8 @@ class Cli < Thor
   method_option :mpi,     type: :boolean, aliases: '-m', banner: 'Up mpi containers'
   method_option :network, type: :boolean, aliases: '-N', banner: 'Setup network'
   def up
-    config = setup_config(options[:production])
-    u = Upper.new(config, options)
+    @@configure.production = options[:production]
+    u = Upper.new(@@configure, options)
     if up_all?(options)
       u.up
     else
@@ -44,8 +44,8 @@ class Cli < Thor
   method_option :nfs, type: :boolean, aliases: '-n', banner: 'Halt nfs VM'
   method_option :mpi, type: :boolean, aliases: '-m', banner: 'Halt mpi containers'
   def halt
-    config = setup_config(options[:production])
-    d = Downer.new(config, options)
+    @@configure.production = options[:production]
+    d = Downer.new(@@configure, options)
     if down_all?(options)
       d.down
     else
@@ -57,7 +57,7 @@ class Cli < Thor
   desc 'deploy [PROJECT_PATH]', 'deploy project'
   method_option :staging, type: :boolean, aliases: '-s', banner: 'Deploy to staging'
   def deploy(project = '.')
-    d = Deployer.new(project, @@config, options)
+    d = Deployer.new(project, @@configure, options)
     d.deploy
   end
 
@@ -66,19 +66,10 @@ class Cli < Thor
     pdsh?
     vagrant?
     packer?
-    config?
-    @@config = YAML.load_file('config.yaml')
+    @@configure = Configure.new
   end
 
   private
-
-  def setup_config(production)
-    config = production ? @@config[:production] : @@config[:staging]
-    @@config[:network] = {} unless @@config[:network].is_a?(Hash)
-    config[:network] = {} unless config[:network].is_a?(Hash)
-    config[:network] = @@config[:network].merge(config[:network])
-    config
-  end
 
   def init_all?(options)
     !options[:key] && !options[:vagrant] && !options[:cookbooks] && !options[:packer]

@@ -4,8 +4,8 @@ require 'yaml'
 require 'erb'
 
 class Initializer
-  def initialize(config, options = {})
-    @config  = config
+  def initialize(configure, options = {})
+    @config  = configure.env_config
     @options = options
   end
 
@@ -20,11 +20,7 @@ class Initializer
     insecure_key_path = 'insecure_key'
     FileUtils.rm_rf(insecure_key_path) if @options[:force]
     return if File.exist?(insecure_key_path)
-    uri           = URI.parse('https://raw.githubusercontent.com/phusion/baseimage-docker/master/image/insecure_key')
-    https         = Net::HTTP.new(uri.host, uri.port)
-    https.use_ssl = true
-    request       = Net::HTTP::Post.new(uri.path)
-    response      = https.request(request)
+    response = curl('https://raw.githubusercontent.com/phusion/baseimage-docker/master/image/insecure_key')
     File.write(insecure_key_path, response.body)
     FileUtils.chmod(0600, insecure_key_path)
   end
@@ -68,6 +64,14 @@ class Initializer
   end
 
   private
+
+  def curl(url)
+    uri           = URI.parse(url)
+    https         = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl = true
+    request       = Net::HTTP::Post.new(uri.path)
+    https.request(request)
+  end
 
   def image?(repo, tag)
     images = `docker images | grep '#{repo}' | awk '{print $1 ":" $2}'`.split("\n")
