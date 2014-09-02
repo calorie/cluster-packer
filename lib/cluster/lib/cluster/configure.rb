@@ -40,4 +40,8 @@ class Configure
   def network
     @config[:network]
   end
+
+  def dummy?
+    production? ? false : staging[:nfs][:dummy]
+  end
 end

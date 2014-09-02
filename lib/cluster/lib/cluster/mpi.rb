@@ -55,6 +55,7 @@ class Mpi
   end
 
   def default_nfs_ip?
+    return true if @config[:nfs][:dummy]
     @config[:nfs][:ip] == '192.168.33.10'
   end
 end

@@ -50,17 +50,8 @@ class Initializer
   end
 
   def packer
-    repo = 'cluster/message-passing-interface'
-    tag  = @config[:image_tag] || 'latest'
-    return if !@options[:force] && image?(repo, tag)
-
-    json = 'packer-mpi.json'
-    if File.exist?(json)
-      vars = "-var 'server_ip=#{@config[:nfs][:ip]}'"
-      vars << " -var 'tag=#{tag}'"
-      vars << " -var 'user=#{@config[:login_user]}'"
-      system("packer build #{vars} #{json}")
-    end
+    packer_mpi
+    packer_nfs if @config[:nfs][:dummy]
   end
 
   private
@@ -79,5 +70,28 @@ class Initializer
       return true if image == "#{repo}:#{tag}"
     end
     false
+  end
+
+  def packer_mpi
+    repo = 'cluster/message-passing-interface'
+    tag  = @config[:image_tag] || 'latest'
+    return if !@options[:force] && image?(repo, tag)
+    vars = "-var 'server_ip=#{@config[:nfs][:ip]}'"
+    vars << " -var 'tag=#{tag}'"
+    vars << " -var 'user=#{@config[:login_user]}'"
+    run_packer('packer-mpi.json', vars)
+  end
+
+  def packer_nfs
+    repo = 'cluster/network-file-system'
+    tag  = @config[:nfs][:image_tag] || 'latest'
+    return if !@options[:force] && image?(repo, tag)
+    vars = "-var 'tag=#{tag}'"
+    run_packer('packer-nfs.json', vars)
+  end
+
+  def run_packer(json, vars = '')
+    return false unless File.exist?(json)
+    system("packer build #{vars} #{json}")
   end
 end

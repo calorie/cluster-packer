@@ -23,20 +23,35 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       chef.add_role 'nfs'
     end
   end
-  <% _config[:node_num].times do |n| %>
-  <% name = "mpi#{n}" %>
+<% if _config[:nfs][:dummy] %>
+  config.vm.define 'nfs-dummy' do |v|
+    v.vm.hostname = 'nfs-dummy'
+    v.vm.provider 'docker' do |d|
+      d.name        = 'nfs-dummy'
+      d.image       = 'cluster/network-file-system:<%= _config[:nfs][:image_tag] || 'latest' %>'
+      d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
+      d.create_args = %w{ --privileged }
+      d.has_ssh     = true
+      d.volumes     = %w{ <%= _config[:nfs][:volumes].is_a?(Array) ? _config[:nfs][:volumes].join(' ') : '/data' %> }
+    end
+    v.ssh.port             = 22
+    v.ssh.username         = 'root'
+    v.ssh.private_key_path = 'insecure_key'
+  end
+<% end %>
+<% _config[:node_num].times do |n| %><% name = "mpi#{n}" %>
   config.vm.define '<%= name %>' do |v|
     v.vm.hostname = '<%= name %>'
     v.vm.provider 'docker' do |d|
       d.name        = '<%= name %>'
       d.image       = 'cluster/message-passing-interface:<%= _config[:image_tag] || 'latest' %>'
       d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
-      d.create_args = %w{ --privileged }
+      d.create_args = %w{ --privileged <%= _config[:nfs][:dummy] ? '--volumes-from=nfs-dummy' : '' %> }
       d.has_ssh     = true
     end
     v.ssh.port             = 22
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-  <% end %>
+<% end %>
 end

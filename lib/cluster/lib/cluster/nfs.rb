@@ -12,7 +12,7 @@ class Nfs
   end
 
   def up_staging
-    system('vagrant up nfs --provider=virtualbox')
+    system(vagrant_up)
   end
 
   def halt_production
@@ -21,6 +21,24 @@ class Nfs
   end
 
   def halt_staging
-    system('vagrant halt nfs')
+    system(vagrant_halt)
+  end
+
+  private
+
+  def vagrant_up
+    if @config[:nfs][:dummy]
+      'vagrant up nfs-dummy --provider=docker'
+    else
+      'vagrant up nfs --provider=virtualbox'
+    end
+  end
+
+  def vagrant_halt
+    if @config[:nfs][:dummy]
+      'vagrant destroy -f nfs-dummy'
+    else
+      'vagrant halt nfs'
+    end
   end
 end

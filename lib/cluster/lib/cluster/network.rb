@@ -31,30 +31,29 @@ class Network
     return false if ids.empty?
     json = `docker inspect #{ids}`
     ip_and_host_maps = JSON.parse(json).map do |j|
+      next if j['Config']['Hostname'] == 'nfs-dummy'
       {
         ip: j['NetworkSettings']['IPAddress'],
         host: j['Config']['Hostname'],
       }
     end
+    ip_and_host_maps.compact!
     remotes = ip_and_host_maps.map { |h| h[:ip] }.join(',')
     ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
-    res = cleanup
+    nfs = @config[:nfs][:dummy] ? 'nfs-dummy' : 'nfs'
+    res = cleanup(nfs)
     res = copy_ssh_files(remotes) if res
     res = setup_ssh(ip_and_host_maps) if res
-    res ? make_hostfile : false
+    res ? make_hostfile(nfs) : false
   end
 
   private
 
-  def cleanup(nfs = nil)
+  def cleanup(nfs)
     if @options[:production]
-      if nfs.nil?
-        false
-      else
-        system("ssh #{nfs} 'sudo /data/scripts/cleanup.sh'")
-      end
+      system("ssh #{nfs} 'sudo /data/scripts/cleanup.sh'")
     else
-      system("vagrant ssh nfs -c 'echo vagrant | sudo -S /data/scripts/cleanup.sh'")
+      system("vagrant ssh #{nfs} -c 'echo vagrant | sudo -S /data/scripts/cleanup.sh'")
     end
   end
 
@@ -93,15 +92,11 @@ class Network
     system("pdsh -R ssh -l #{@user} -w #{remotes} 'sudo #{@home}/setup_ssh.sh #{host}'")
   end
 
-  def make_hostfile(nfs = nil)
+  def make_hostfile(nfs)
     if @options[:production]
-      if nfs.nil?
-        false
-      else
-        system("ssh #{nfs} 'sudo /data/scripts/make_hostfile.sh'")
-      end
+      system("ssh #{nfs} 'sudo /data/scripts/make_hostfile.sh'")
     else
-      system("vagrant ssh nfs -c 'echo vagrant | sudo -S /data/scripts/make_hostfile.sh'")
+      system("vagrant ssh #{nfs} -c 'echo vagrant | sudo -S /data/scripts/make_hostfile.sh'")
     end
   end
 end

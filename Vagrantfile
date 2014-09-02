@@ -24,6 +24,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  config.vm.define 'nfs-dummy' do |v|
+    v.vm.hostname = 'nfs-dummy'
+    v.vm.provider 'docker' do |d|
+      d.name        = 'nfs-dummy'
+      d.image       = 'cluster/network-file-system:latest'
+      d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
+      d.create_args = %w{ --privileged }
+      d.has_ssh     = true
+      d.volumes     = %w{ /data }
+    end
+    v.ssh.port             = 22
+    v.ssh.username         = 'root'
+    v.ssh.private_key_path = 'insecure_key'
+  end
+
 
   config.vm.define 'mpi0' do |v|
     v.vm.hostname = 'mpi0'
@@ -31,14 +46,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.name        = 'mpi0'
       d.image       = 'cluster/message-passing-interface:latest'
       d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
-      d.create_args = %w{ --privileged }
+      d.create_args = %w{ --privileged --volumes-from=nfs-dummy }
       d.has_ssh     = true
     end
     v.ssh.port             = 22
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-
 
   config.vm.define 'mpi1' do |v|
     v.vm.hostname = 'mpi1'
@@ -46,14 +60,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.name        = 'mpi1'
       d.image       = 'cluster/message-passing-interface:latest'
       d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
-      d.create_args = %w{ --privileged }
+      d.create_args = %w{ --privileged --volumes-from=nfs-dummy }
       d.has_ssh     = true
     end
     v.ssh.port             = 22
     v.ssh.username         = 'root'
     v.ssh.private_key_path = 'insecure_key'
   end
-
 
   config.vm.define 'mpi2' do |v|
     v.vm.hostname = 'mpi2'
@@ -61,7 +74,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.name        = 'mpi2'
       d.image       = 'cluster/message-passing-interface:latest'
       d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
-      d.create_args = %w{ --privileged }
+      d.create_args = %w{ --privileged --volumes-from=nfs-dummy }
       d.has_ssh     = true
     end
     v.ssh.port             = 22
@@ -69,14 +82,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.ssh.private_key_path = 'insecure_key'
   end
 
-
   config.vm.define 'mpi3' do |v|
     v.vm.hostname = 'mpi3'
     v.vm.provider 'docker' do |d|
       d.name        = 'mpi3'
       d.image       = 'cluster/message-passing-interface:latest'
       d.cmd         = %w{ /sbin/my_init --enable-insecure-key }
-      d.create_args = %w{ --privileged }
+      d.create_args = %w{ --privileged --volumes-from=nfs-dummy }
       d.has_ssh     = true
     end
     v.ssh.port             = 22
