@@ -30,5 +30,5 @@ nfs_export mount_dir do
   network   '*'
   writeable true
   sync      true
-  options   ['rw', 'insecure', 'no_root_squash', 'no_subtree_check']
+  options   %w{ rw insecure no_root_squash no_subtree_check sync fsid=0 }
 end
