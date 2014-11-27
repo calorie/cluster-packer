@@ -11,7 +11,7 @@
   libtool
   automake
   autoconf
-  binutils-gold
+  binutils
 }.each { |pkg| package pkg }
 
 ark 'mpispec' do
