@@ -23,4 +23,6 @@ else
     timeout   36000
     action    :install_with_make
   end
+
+  execute 'ldconfig'
 end
