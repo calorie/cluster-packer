@@ -23,7 +23,7 @@ end
   setup_ssh.sh
 }.each do |script|
   template File.join(user_home, script) do
-    mode 755
+    mode '0755'
     owner node['user']
     group node['user']
     variables(

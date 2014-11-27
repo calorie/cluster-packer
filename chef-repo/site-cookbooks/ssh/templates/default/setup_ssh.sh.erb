@@ -18,8 +18,8 @@ init_authorized_keys()
   local user=$2
   if [ ! -f $authorized_keys ]; then
     touch $authorized_keys
-    chmod 600 $authorized_keys
-    chown ${user}:${user} $authorized_keys
+    sudo chmod 600 $authorized_keys
+    sudo chown ${user}:${user} $authorized_keys
   fi
 }
 
@@ -29,8 +29,8 @@ init_config()
   local user=$2
   [ -f $config ] && rm -f $config
   touch $config
-  chmod 600 $config
-  chown ${user}:${user} $config
+  sudo chmod 600 $config
+  sudo chown ${user}:${user} $config
 }
 
 add_key()

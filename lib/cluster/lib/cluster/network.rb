@@ -58,7 +58,7 @@ class Network
   end
 
   def copy_ssh_files(remotes)
-    system("pdsh -R ssh -l #{@user} -w #{remotes} 'sudo #{@home}/copy_ssh_files.sh'")
+    system("pdsh -R ssh -l #{@user} -w #{remotes} '#{@home}/copy_ssh_files.sh'")
   end
 
   def setup_ssh(ip_and_host_maps)
@@ -89,7 +89,7 @@ class Network
   end
 
   def link_hosts(host, remotes)
-    system("pdsh -R ssh -l #{@user} -w #{remotes} 'sudo #{@home}/setup_ssh.sh #{host}'")
+    system("pdsh -R ssh -l #{@user} -w #{remotes} '#{@home}/setup_ssh.sh #{host}'")
   end
 
   def make_hostfile(nfs)

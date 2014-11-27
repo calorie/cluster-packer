@@ -21,7 +21,7 @@ end
   make_hostfile.sh
 }.each do |script|
   template File.join(scripts_dir, script) do
-    mode 755
+    mode '0755'
     variables(mount_dir: mount_dir)
   end
 end
