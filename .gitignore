@@ -11,3 +11,5 @@ vendor/bundle
 chef-repo/nodes/*.json
 !chef-repo/nodes/mpi.json
 !chef-repo/nodes/nfs.json
+config.yml
+Vagrantfile

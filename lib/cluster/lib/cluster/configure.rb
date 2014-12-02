@@ -2,7 +2,7 @@ class Configure
   attr_reader :config
   attr_writer :production
 
-  CONFIG_FILE = 'config.yaml'
+  CONFIG_FILE = 'config.yml'
 
   def initialize(production = false)
     @config     = YAML.load_file(CONFIG_FILE) if config?
@@ -10,11 +10,33 @@ class Configure
   end
 
   def config?
-    unless File.exist?(CONFIG_FILE)
-      puts "#{CONFIG_FILE} is not found."
+    return true if File.exist?(CONFIG_FILE) || example?
+    puts "#{CONFIG_FILE} is not found."
+    exit 1
+  end
+
+  def example?
+    while true
+      print "Would you like to use #{CONFIG_FILE}.example? [y|n]:"
+      case STDIN.gets
+      when /\A[yY]/
+        example
+        return true
+      when /\A[nN]/
+        return false
+      end
+    end
+  end
+
+  def example
+    templates = File.join(File.dirname(__FILE__), 'templates')
+    template = File.join(templates, "#{CONFIG_FILE}.example")
+    unless File.exist?(template)
+      puts "#{template} is not found."
       exit 1
     end
-    true
+    erb = ERB.new(File.read(template))
+    File.write(CONFIG_FILE, erb.result)
   end
 
   def env_config
