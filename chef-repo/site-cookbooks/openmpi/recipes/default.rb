@@ -16,12 +16,13 @@ if node['openmpi']['package']
   packages.each { |pkg| package pkg }
 else
   ark 'openmpi' do
-    owner     node['user']
-    url       node['openmpi']['url']
-    version   node['openmpi']['version']
-    make_opts node['openmpi']['make_opts']
-    timeout   36000
-    action    :install_with_make
+    owner         node['user']
+    url           node['openmpi']['url']
+    version       node['openmpi']['version']
+    autoconf_opts node['openmpi']['conf_opts']
+    make_opts     node['openmpi']['make_opts']
+    timeout       36000
+    action        :install_with_make
   end
 
   execute 'ldconfig'

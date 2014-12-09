@@ -7,12 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-%w{
-  libtool
-  automake
-  autoconf
-  binutils
-}.each { |pkg| package pkg }
+node['mpispec']['packages'].each { |pkg| package pkg }
 
 ark 'mpispec' do
   owner       node['user']
