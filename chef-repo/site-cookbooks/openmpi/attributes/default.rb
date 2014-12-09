@@ -1,4 +1,4 @@
-default['openmpi']['package'] = true
+default['openmpi']['package'] = false
 default['openmpi']['debian']  = %w(openmpi-bin libopenmpi-dev)
 
 default['openmpi']['version']   = '1.8.3'
