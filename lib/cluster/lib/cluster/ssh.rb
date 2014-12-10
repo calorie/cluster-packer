@@ -4,8 +4,7 @@ module Cluster
       @config = config.env_config
       @remote = config.production?
       @host   = host
-      @ip     = ''
-      @opts   = opts
+      @opts   = opts.join(' ')
     end
 
     def connect
@@ -13,29 +12,27 @@ module Cluster
     end
 
     def local
-      system("vagrant ssh #{@host} #{@opts.join(' ')}")
+      system("vagrant ssh #{@host} #{@opts}")
     end
 
     def remote
-      @ip = if nfs?
-              @config[:nfs][:ip]
-            else
-              n = @config[:mpi].find { |c| c[:host] == @host }
-              n.nil? ? '' : n[:ip]
-            end
-      system("ssh #{@host}@#{@ip} #{@opts}") if valid?
+      user = @config[:login_user]
+      ip = if nfs?
+             @config[:nfs][:ip]
+           else
+             n = @config[:mpi].find { |c| c[:host] == @host }
+             n.nil? ? '' : n[:ip]
+           end
+      target = ip.nil? ? @host : ip.empty? ? nil : "#{user}@#{ip}"
+      return system("ssh #{target} #{@opts}") unless target.nil?
+      puts "`#{@host}` is not found."
+      false
     end
 
     private
 
     def nfs?
       @host == @config[:nfs][:host]
-    end
-
-    def valid?
-      return true if !@ip.empty?
-      puts "`#{@host}` if not found."
-      false
     end
   end
 end
