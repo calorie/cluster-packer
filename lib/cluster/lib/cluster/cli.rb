@@ -61,6 +61,13 @@ class Cli < Thor
     d.deploy
   end
 
+  desc 'ssh [HOST_NAME] [OPTIONS]', 'connect to the host'
+  def ssh(host, *opts)
+    @@configure.production = options[:production]
+    ssh = Ssh.new(@@configure, host, opts)
+    ssh.connect
+  end
+
   before_method(*instance_methods(false)) do
     docker?
     pdsh?
