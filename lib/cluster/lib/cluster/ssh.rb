@@ -12,7 +12,7 @@ class Ssh
   end
 
   def local
-    # system("vagrant ssh #{@host} #{@opts.join(' ')}")
+    system("vagrant ssh #{@host} #{@opts.join(' ')}")
   end
 
   def remote
