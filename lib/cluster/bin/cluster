@@ -11,4 +11,4 @@ end
 
 include Cluster::Validator
 
-Cli.start
+Cluster::Cli.start
