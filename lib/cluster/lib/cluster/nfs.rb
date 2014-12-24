@@ -11,11 +11,12 @@ module Cluster
       nfs  = @config[:nfs]
       user = @config[:login_user]
       host = nfs[:ip] || nfs[:host]
+      check_nfs_ip
       system("cd chef-repo && bundle exec knife solo bootstrap #{user}@#{host} nodes/nfs.json && cd ..")
     end
 
     def up_staging
-      default_nfs_ip?
+      check_nfs_ip
       system(vagrant_up)
     end
 
@@ -46,8 +47,8 @@ module Cluster
       end
     end
 
-    def default_nfs_ip?
-      return true if @config[:nfs][:dummy]
+    def check_nfs_ip
+      return if @config[:nfs][:dummy]
       nodes_dir = File.join('chef-repo', 'nodes')
       nfs_json = File.join(nodes_dir, 'nfs.json')
       unless File.exist?(nfs_json)
@@ -55,10 +56,9 @@ module Cluster
         exit 1
       end
       hash = JSON.parse(File.read(nfs_json))
-      return true if hash['nfs']['server_ip'] == @config[:nfs][:ip]
+      return if hash['nfs']['server_ip'] == @config[:nfs][:ip]
       hash['nfs']['server_ip'] = @config[:nfs][:ip]
       File.write(nfs_json, hash.to_json)
-      false
     end
   end
 end
