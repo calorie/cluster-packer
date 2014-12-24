@@ -1,3 +1,2 @@
-default['nfs']['server_dir'] = '/data'
-default['nfs']['mount_dir']  = '/data'
-default['nfs']['server_ip']  = '192.168.33.10'
+default['nfs']['user'] = node['user'] || 'root'
+default['nfs']['mount_dir'] = node['nfs']['user'] == 'root' ? '/root/data' : File.join('/home', node['nfs']['user'], 'data')

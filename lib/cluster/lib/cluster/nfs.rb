@@ -1,3 +1,5 @@
+require 'json'
+
 module Cluster
   class Nfs
     def initialize(configure, options)
@@ -13,6 +15,7 @@ module Cluster
     end
 
     def up_staging
+      default_nfs_ip?
       system(vagrant_up)
     end
 
@@ -41,6 +44,21 @@ module Cluster
       else
         'vagrant halt nfs'
       end
+    end
+
+    def default_nfs_ip?
+      return true if @config[:nfs][:dummy]
+      nodes_dir = File.join('chef-repo', 'nodes')
+      nfs_json = File.join(nodes_dir, 'nfs.json')
+      unless File.exist?(nfs_json)
+        puts "#{nfs_json} is not found."
+        exit 1
+      end
+      hash = JSON.parse(File.read(nfs_json))
+      return true if hash['nfs']['server_ip'] == @config[:nfs][:ip]
+      hash['nfs']['server_ip'] = @config[:nfs][:ip]
+      File.write(nfs_json, hash.to_json)
+      false
     end
   end
 end

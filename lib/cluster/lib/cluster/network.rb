@@ -7,7 +7,7 @@ module Cluster
       @network = configure.network || {}
       @options = options
       @user    = @config[:login_user]
-      @home    = @user == 'root' ? '/root' : File.join('/home', @user)
+      @scripts = File.join(configure.data, 'scripts')
     end
 
     def up_production
@@ -37,8 +37,7 @@ module Cluster
           ip: j['NetworkSettings']['IPAddress'],
           host: j['Config']['Hostname'],
         }
-      end
-      ip_and_host_maps.compact!
+      end.compact
       remotes = ip_and_host_maps.map { |h| h[:ip] }.join(',')
       ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
       nfs = @config[:nfs][:dummy] ? 'nfs-dummy' : 'nfs'
@@ -51,15 +50,16 @@ module Cluster
     private
 
     def cleanup(nfs)
+      cleanup_sh = File.join(@scripts, 'cleanup.sh')
       if @options[:production]
-        system("ssh #{nfs} 'sudo /data/scripts/cleanup.sh'")
+        system("ssh #{nfs} '#{cleanup_sh}'")
       else
-        system("vagrant ssh #{nfs} -c 'echo vagrant | sudo -S /data/scripts/cleanup.sh'")
+        system("vagrant ssh #{nfs} -c '#{cleanup_sh}'")
       end
     end
 
     def copy_ssh_files(remotes)
-      system("pdsh -R ssh -l #{@user} -w #{remotes} '#{@home}/copy_ssh_files.sh'")
+      system("pdsh -R ssh -l #{@user} -w #{remotes} '#{File.join(@scripts, 'copy_ssh_files.sh')}'")
     end
 
     def setup_ssh(ip_and_host_maps)
@@ -90,14 +90,15 @@ module Cluster
     end
 
     def link_hosts(host, remotes)
-      system("pdsh -R ssh -l #{@user} -w #{remotes} '#{@home}/setup_ssh.sh #{host}'")
+      system("pdsh -R ssh -l #{@user} -w #{remotes} '#{File.join(@scripts, 'setup_ssh.sh')} #{host}'")
     end
 
     def make_hostfile(nfs)
+      make_hostfile_sh = File.join(@scripts, 'make_hostfile.sh')
       if @options[:production]
-        system("ssh #{nfs} 'sudo /data/scripts/make_hostfile.sh'")
+        system("ssh #{nfs} '#{make_hostfile_sh}'")
       else
-        system("vagrant ssh #{nfs} -c 'echo vagrant | sudo -S /data/scripts/make_hostfile.sh'")
+        system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}'")
       end
     end
   end

@@ -1,4 +1,4 @@
-require 'json'
+require 'fileutils'
 
 module Cluster
   class Mpi
@@ -19,7 +19,6 @@ module Cluster
     end
 
     def up_staging
-      create_json(@config[:login_user], 'mpi') unless default_nfs_ip?
       nodes = (0...@config[:node_num]).map { |i| "mpi#{i}" }.join(' ')
       system("vagrant up #{nodes} --provider=docker")
     end
@@ -48,16 +47,7 @@ module Cluster
         puts "#{mpi_json} is not found."
         exit 1
       end
-
-      hash = JSON.parse(File.read(mpi_json))
-      hash['user'] = user
-      hash['nfs']['server_ip'] = @config[:nfs][:ip]
-      File.write(host_json, hash.to_json)
-    end
-
-    def default_nfs_ip?
-      return true if @config[:nfs][:dummy]
-      @config[:nfs][:ip] == '192.168.33.10'
+      FileUtils.cp(mpi_json, host_json)
     end
   end
 end

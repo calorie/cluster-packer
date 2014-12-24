@@ -2,6 +2,9 @@ name 'mpi'
 description 'computing node'
 run_list(
   'recipe[apt]',
+  'recipe[chef-solo-search]',
+  'recipe[users::sysadmins]',
+  'recipe[sudo]',
   'recipe[timezone]',
   'recipe[ssh]',
   'recipe[git]',

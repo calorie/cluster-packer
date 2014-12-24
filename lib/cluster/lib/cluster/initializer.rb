@@ -75,8 +75,7 @@ module Cluster
       repo = 'cluster/message-passing-interface'
       tag  = @config[:image_tag] || 'latest'
       return if !@options[:force] && image?(repo, tag)
-      vars = "-var 'server_ip=#{@config[:nfs][:ip]}'"
-      vars << " -var 'tag=#{tag}'"
+      vars = " -var 'tag=#{tag}'"
       vars << " -var 'user=#{@config[:login_user]}'"
       run_packer('packer-mpi.json', vars)
     end
@@ -86,6 +85,8 @@ module Cluster
       tag  = @config[:nfs][:image_tag] || 'latest'
       return if !@options[:force] && image?(repo, tag)
       vars = "-var 'tag=#{tag}'"
+      vars << " -var 'user=#{@config[:login_user]}'"
+      vars << " -var 'nfs_server_ip=#{@config[:nfs][:ip]}'"
       run_packer('packer-nfs.json', vars)
     end
 
