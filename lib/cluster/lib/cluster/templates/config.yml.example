@@ -26,4 +26,4 @@
   :protcol: 'git'
   :repository: 'https://bitbucket.org/calorie/sample.git'
   :path: '/home/mpi/data/sample'
-  :test_cmd: 'mpispec -np 4 --allow-run-as-root --hostfile /home/mpi/data/hostfile'
+  :test_cmd: 'mpispec -np 4 --hostfile /home/mpi/data/hostfile'
