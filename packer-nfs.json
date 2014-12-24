@@ -1,6 +1,8 @@
 {
   "variables": {
-    "tag": "latest"
+    "tag": "latest",
+    "user": "mpi",
+    "nfs_server_ip": "192.168.33.10"
   },
   "builders": [
     {
@@ -25,7 +27,27 @@
       "type": "chef-solo",
       "cookbook_paths": ["chef-repo/cookbooks", "chef-repo/site-cookbooks"],
       "roles_path": "chef-repo/roles",
-      "run_list": ["role[nfs]"]
+      "data_bags_path": "chef-repo/data_bags",
+      "run_list": ["role[nfs]"],
+      "json": {
+        "user": "{{user `user`}}",
+        "nfs": {
+          "server_ip": "{{user `nfs_server_ip`}}"
+        },
+        "authorization": {
+          "sudo": {
+            "groups": ["sysadmin", "mpi"],
+            "users": ["mpi"],
+            "passwordless": "true",
+            "sudoers_defaults": [
+              "env_reset",
+              "mail_badpass",
+              "secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"",
+              "timestamp_timeout = 1440"
+            ]
+          }
+        }
+      }
     }
   ],
   "post-processors": [

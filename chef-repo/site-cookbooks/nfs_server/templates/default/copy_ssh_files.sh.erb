@@ -13,19 +13,19 @@ config=${configs_dir}/${hostname}
 ssh_config=${ssh_home}/config
 
 if ! mountpoint -q $mount_dir ; then
-  sudo mount -t nfs -o rw,proto=tcp,port=2049 ${server_ip}:${mount_dir} $mount_dir
+  mount -t nfs -o rw,proto=tcp,port=2049 ${server_ip}:${mount_dir} $mount_dir
 fi
 
-[ -d $keys_dir ] || sudo mkdir $keys_dir
-[ -d $configs_dir ] || sudo mkdir $configs_dir
+[ -d $keys_dir ] || mkdir $keys_dir
+[ -d $configs_dir ] || mkdir $configs_dir
 
 if [ ! -f $public_key ]; then
   echo -e 'y' | ssh-keygen -q -f ${ssh_home}/id_rsa -t rsa -N '' > /dev/null
-  sudo cp ${ssh_home}/id_rsa.pub $public_key
+  cp ${ssh_home}/id_rsa.pub $public_key
 fi
 
 if [ ! -f $config ]; then
   [ -f $ssh_config ] && rm -f $ssh_config
   printf "Host ${hostname}\n  HostName ${ip}\n" > $ssh_config
-  sudo cp ${ssh_config} $config
+  cp ${ssh_config} $config
 fi

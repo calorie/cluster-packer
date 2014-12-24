@@ -67,5 +67,14 @@ module Cluster
     def dummy?
       production? ? false : staging[:nfs][:dummy]
     end
+
+    def home
+      user = production? ? production[:login_user] : staging[:login_user]
+      user == 'root' ? '/root' : File.join('/home', user)
+    end
+
+    def data
+      File.join(home, 'data')
+    end
   end
 end
