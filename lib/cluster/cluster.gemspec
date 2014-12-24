@@ -9,17 +9,8 @@ Gem::Specification.new do |s|
   s.description = "cluster"
   s.email = "s2g4t1n2@gmail.com"
   s.executables = ["cluster"]
-  s.extra_rdoc_files = [
-    "LICENSE.txt",
-    "README.rdoc"
-  ]
   s.files = [
     ".rspec",
-    "Gemfile",
-    "LICENSE.txt",
-    "README.rdoc",
-    "Rakefile",
-    "VERSION",
     "bin/cluster",
     "cluster.gemspec"
   ]
