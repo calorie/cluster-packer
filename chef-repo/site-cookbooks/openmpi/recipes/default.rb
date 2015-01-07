@@ -7,14 +7,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
-node['openmpi']['packages'].each do |pkg|
-  package pkg
-end
+include_recipe 'build-essential'
 
-if node['openmpi']['package']
-  packages = node['openmpi'][node['platform_family']] || []
-  packages.each { |pkg| package pkg }
-else
+if node['openmpi']['compile']
+  node['openmpi']['dependencies'].each { |pkg| package pkg }
+
   ark 'openmpi' do
     owner         node['user']
     url           node['openmpi']['url']
@@ -26,4 +23,7 @@ else
   end
 
   execute 'ldconfig'
+else
+  packages = node['openmpi'][node['platform_family']] || []
+  packages.each { |pkg| package pkg }
 end

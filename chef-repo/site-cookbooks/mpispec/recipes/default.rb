@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-node['mpispec']['packages'].each { |pkg| package pkg }
+node['mpispec']['dependencies'].each { |pkg| package pkg }
 
 ark 'mpispec' do
   owner       node['user']

@@ -1,7 +1,5 @@
-default['mpispec']['packages']  = %w{
+default['mpispec']['dependencies'] = %w{
   libtool
-  automake
-  autoconf
   binutils
 }
 default['mpispec']['revision']  = 'master'
