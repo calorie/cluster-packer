@@ -7,47 +7,49 @@ module Cluster
       @network = configure.network || {}
       @options = options
       @user    = @config[:login_user]
-      @scripts = File.join(configure.data, 'scripts')
+      @data    = configure.data
+      @scripts = File.join(@data, 'scripts')
     end
 
     def up_production
       mpi = @config[:mpi]
       nfs = "#{@user}@#{@config[:nfs][:ip] || @config[:nfs][:host]}"
-      remote_hashes = mpi.map do |node|
+      mpi_hashes = mpi.map do |node|
         {
           ip: node[:ip],
           host: node[:host],
         }
       end
-      remotes = remote_hashes.map { |h| h[:ip] || h[:host] }.join(',')
       ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
-      res = cleanup(nfs)
-      res = copy_ssh_files(remotes) if res
-      res = setup_ssh(remote_hashes) if res
-      res ? make_hostfile(nfs) : false
+      run_scripts(nfs, mpi_hashes)
     end
 
     def up_staging
       ids = `docker ps -q`.split("\n").join(' ')
       return false if ids.empty?
       json = `docker inspect #{ids}`
-      ip_and_host_maps = JSON.parse(json).map do |j|
+      mpi_hashes = JSON.parse(json).map do |j|
         next if j['Config']['Hostname'] == 'nfs-dummy'
         {
           ip: j['NetworkSettings']['IPAddress'],
           host: j['Config']['Hostname'],
         }
       end.compact
-      remotes = ip_and_host_maps.map { |h| h[:ip] }.join(',')
       ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
       nfs = @config[:nfs][:dummy] ? 'nfs-dummy' : 'nfs'
-      res = cleanup(nfs)
-      res = copy_ssh_files(remotes) if res
-      res = setup_ssh(ip_and_host_maps) if res
-      res ? make_hostfile(nfs) : false
+      run_scripts(nfs, mpi_hashes)
     end
 
     private
+
+    def run_scripts(nfs, mpi_hashes)
+      remotes = mpi_hashes.map { |h| h[:ip] || h[:host] }.join(',')
+      res = cleanup(nfs)
+      res = mount(remotes) if res
+      res = copy_ssh_files(remotes) if res
+      res = setup_ssh(mpi_hashes) if res
+      res ? make_hostfile(nfs) : false
+    end
 
     def cleanup(nfs)
       cleanup_sh = File.join(@scripts, 'cleanup.sh')
@@ -56,6 +58,16 @@ module Cluster
       else
         system("vagrant ssh #{nfs} -c '#{cleanup_sh}'")
       end
+    end
+
+    def mount(remotes)
+      system <<-EOS
+pdsh -R ssh -l #{@user} -w #{remotes} '
+if ! mountpoint -q #{@data} ; then
+  sudo mount -t nfs -o rw,proto=tcp,port=2049 #{@config[:nfs][:ip]}:#{@data} #{@data}
+fi
+'
+EOS
     end
 
     def copy_ssh_files(remotes)

@@ -1,9 +1,6 @@
 {
   "run_list": ["role[nfs]"],
   "user": "mpi",
-  "nfs": {
-    "server_ip": "192.168.100.191"
-  },
   "authorization": {
     "sudo": {
       "groups": ["sysadmin", "mpi"],

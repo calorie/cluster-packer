@@ -86,7 +86,6 @@ module Cluster
       return if !@options[:force] && image?(repo, tag)
       vars = "-var 'tag=#{tag}'"
       vars << " -var 'user=#{@config[:login_user]}'"
-      vars << " -var 'nfs_server_ip=#{@config[:nfs][:ip]}'"
       run_packer('packer-nfs.json', vars)
     end
 

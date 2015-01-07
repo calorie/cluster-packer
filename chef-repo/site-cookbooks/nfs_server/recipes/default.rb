@@ -32,7 +32,6 @@ end
     variables(
       user:      node['nfs']['user'],
       user_home: node['nfs']['user_home'],
-      server_ip: node['nfs']['server_ip'],
       mount_dir: mount_dir
     )
   end

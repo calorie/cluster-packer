@@ -2,7 +2,6 @@
 
 user_home=<%= @user_home %>
 ssh_home=${user_home}/.ssh
-server_ip=<%= @server_ip %>
 mount_dir=<%= @mount_dir %>
 hostname=`hostname`
 ip=`hostname -I`
@@ -11,10 +10,6 @@ configs_dir=${mount_dir}/configs
 public_key=${keys_dir}/${hostname}.pub
 config=${configs_dir}/${hostname}
 ssh_config=${ssh_home}/config
-
-if ! mountpoint -q $mount_dir ; then
-  mount -t nfs -o rw,proto=tcp,port=2049 ${server_ip}:${mount_dir} $mount_dir
-fi
 
 [ -d $keys_dir ] || mkdir $keys_dir
 [ -d $configs_dir ] || mkdir $configs_dir

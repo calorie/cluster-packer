@@ -7,7 +7,8 @@ module Cluster
 
     def initialize
       @config = YAML.load_file(CONFIG_FILE) if config?
-      @config[:staging][:login_user] = @config[:production][:login_user] ||= 'mpi'
+      @config[:staging][:login_user]    ||= 'mpi'
+      @config[:production][:login_user] ||= 'mpi'
     end
 
     def config?

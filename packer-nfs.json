@@ -1,8 +1,7 @@
 {
   "variables": {
     "tag": "latest",
-    "user": "mpi",
-    "nfs_server_ip": "192.168.33.10"
+    "user": "mpi"
   },
   "builders": [
     {
@@ -31,9 +30,6 @@
       "run_list": ["role[nfs]"],
       "json": {
         "user": "{{user `user`}}",
-        "nfs": {
-          "server_ip": "{{user `nfs_server_ip`}}"
-        },
         "authorization": {
           "sudo": {
             "groups": ["sysadmin", "mpi"],
