@@ -9,7 +9,7 @@ module Cluster
 
     def up_production
       nfs  = @config[:nfs]
-      user = @config[:login_user]
+      user = @config[:setup_user]
       host = nfs[:ip] || nfs[:host]
       check_nfs_ip
       system("cd chef-repo && bundle exec knife solo bootstrap #{user}@#{host} nodes/nfs.json && cd ..")
@@ -22,7 +22,7 @@ module Cluster
 
     def halt_production
       nfs = "#{@config[:login_user]}@#{@config[:nfs][:ip] || @config[:nfs][:host]}"
-      system("ssh #{nfs} 'sudo shutdown -h now'")
+      system("ssh #{nfs} -i insecure_key 'sudo shutdown -h now'")
     end
 
     def halt_staging

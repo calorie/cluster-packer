@@ -37,11 +37,11 @@ module Cluster
     def test_passed?
       remote = deploy_node(@staging)
       path   = @deploy[:path]
-      system("ssh -i ./insecure_key #{remote} 'cd #{path} && #{@deploy[:test_cmd]}'")
+      system("ssh -i insecure_key #{remote} 'cd #{path} && #{@deploy[:test_cmd]}'")
       results_dir = './.cluster'
       FileUtils.mkdir(results_dir) unless File.exist?(results_dir)
       FileUtils.rm_f(File.join(results_dir, '*'))
-      system("scp -i ./insecure_key #{remote}:#{File.join(path, 'rank*_output.xml')} #{results_dir}")
+      system("scp -i insecure_key #{remote}:#{File.join(path, 'rank*_output.xml')} #{results_dir}")
       XmlParser.parse(results_dir)
     end
 
@@ -90,7 +90,7 @@ EOS
 
     def ssh_options(production = false)
       ssh_opts = @deploy[:ssh_opts] || ''
-      ssh_opts << ' -i ./insecure_key' unless production
+      ssh_opts << ' -i insecure_key'
       ssh_opts
     end
 

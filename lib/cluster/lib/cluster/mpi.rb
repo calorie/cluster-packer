@@ -10,7 +10,7 @@ module Cluster
     def up_production
       mpi = @config[:mpi]
       remotes = mpi.map do |node|
-        user = @config[:login_user]
+        user = @config[:setup_user]
         host = node[:ip] || node[:host]
         create_json(user, host)
         "#{user}@#{host}"
@@ -27,7 +27,7 @@ module Cluster
       mpi     = @config[:mpi]
       user    = @config[:login_user]
       remotes = mpi.map { |node| node[:ip] || node[:host] }.join(',')
-      system("pdsh -R ssh -l #{user} -w #{remotes} 'sudo shutdown -h now'")
+      system("pdsh -R ssh -l #{user} -w #{remotes} -i insecure_key 'sudo shutdown -h now'")
     end
 
     def halt_staging

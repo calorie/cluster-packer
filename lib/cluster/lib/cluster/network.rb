@@ -20,7 +20,7 @@ module Cluster
         }
       end
       remotes = remote_hashes.map { |h| h[:ip] || h[:host] }.join(',')
-      ENV['PDSH_SSH_ARGS'] ||= '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+      ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
       res = cleanup(nfs)
       res = copy_ssh_files(remotes) if res
       res = setup_ssh(remote_hashes) if res
@@ -52,7 +52,7 @@ module Cluster
     def cleanup(nfs)
       cleanup_sh = File.join(@scripts, 'cleanup.sh')
       if @options[:production]
-        system("ssh #{nfs} '#{cleanup_sh}'")
+        system("ssh #{nfs} -i insecure_key '#{cleanup_sh}'")
       else
         system("vagrant ssh #{nfs} -c '#{cleanup_sh}'")
       end
@@ -96,7 +96,7 @@ module Cluster
     def make_hostfile(nfs)
       make_hostfile_sh = File.join(@scripts, 'make_hostfile.sh')
       if @options[:production]
-        system("ssh #{nfs} '#{make_hostfile_sh}'")
+        system("ssh #{nfs} -i insecure_key '#{make_hostfile_sh}'")
       else
         system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}'")
       end

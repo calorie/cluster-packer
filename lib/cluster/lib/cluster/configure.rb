@@ -1,13 +1,13 @@
 module Cluster
   class Configure
     attr_reader :config
-    attr_writer :production
+    attr_writer :is_production
 
     CONFIG_FILE = 'config.yml'
 
-    def initialize(production = false)
-      @config     = YAML.load_file(CONFIG_FILE) if config?
-      @production = production
+    def initialize
+      @config = YAML.load_file(CONFIG_FILE) if config?
+      @config[:staging][:login_user] = @config[:production][:login_user] ||= 'mpi'
     end
 
     def config?
@@ -41,7 +41,7 @@ module Cluster
     end
 
     def env_config
-      @production ? production : staging
+      production? ? production : staging
     end
 
     def staging
@@ -53,7 +53,7 @@ module Cluster
     end
 
     def production?
-      @production
+      @is_production
     end
 
     def deploy

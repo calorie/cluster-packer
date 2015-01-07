@@ -24,7 +24,7 @@ module Cluster
              n.nil? ? '' : n[:ip]
            end
       target = ip.nil? ? @host : ip.empty? ? nil : "#{user}@#{ip}"
-      return system("ssh #{target} #{@opts}") unless target.nil?
+      return system("ssh #{target} #{@opts} -i insecure_key") unless target.nil?
       puts "`#{@host}` is not found."
       false
     end

@@ -13,7 +13,7 @@ module Cluster
     method_option :vagrant,   type: :boolean, aliases: '-v', banner: 'Init Vagrantfile'
     method_option :packer,    type: :boolean, aliases: '-P', banner: 'Create MPI node image'
     def init
-      @@configure.production = options[:production]
+      @@configure.is_production = options[:production]
       i = Initializer.new(@@configure, options)
       if init_all?(options)
         i.bootstrap
@@ -30,7 +30,7 @@ module Cluster
     method_option :mpi,     type: :boolean, aliases: '-m', banner: 'Up mpi containers'
     method_option :network, type: :boolean, aliases: '-N', banner: 'Setup network'
     def up
-      @@configure.production = options[:production]
+      @@configure.is_production = options[:production]
       u = Upper.new(@@configure, options)
       if up_all?(options)
         u.up
@@ -45,7 +45,7 @@ module Cluster
     method_option :nfs, type: :boolean, aliases: '-n', banner: 'Halt nfs VM'
     method_option :mpi, type: :boolean, aliases: '-m', banner: 'Halt mpi containers'
     def halt
-      @@configure.production = options[:production]
+      @@configure.is_production = options[:production]
       d = Downer.new(@@configure, options)
       if down_all?(options)
         d.down
@@ -64,7 +64,7 @@ module Cluster
 
     desc 'ssh [HOST_NAME] [OPTIONS]', 'connect to the host'
     def ssh(host, *opts)
-      @@configure.production = options[:production]
+      @@configure.is_production = options[:production]
       ssh = Ssh.new(@@configure, host, opts)
       ssh.connect
     end
