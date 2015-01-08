@@ -3,15 +3,18 @@ require 'json'
 module Cluster
   class Nfs
     def initialize(configure, options)
-      @config  = configure.env_config
-      @options = options
+      @root         = configure.root_path
+      @config       = configure.env_config
+      @chef_repo    = configure.chef_repo
+      @insecure_key = configure.key_path
+      @options      = options
     end
 
     def up_production
       nfs  = @config[:nfs]
       user = @config[:setup_user]
       host = nfs[:ip] || nfs[:host]
-      system("cd chef-repo && bundle exec knife solo bootstrap #{user}@#{host} nodes/nfs.json && cd ..")
+      system("cd #{@chef_repo} && bundle exec knife solo bootstrap #{user}@#{host} nodes/nfs.json && cd #{@root}")
     end
 
     def up_staging
@@ -20,7 +23,7 @@ module Cluster
 
     def halt_production
       nfs = "#{@config[:login_user]}@#{@config[:nfs][:ip] || @config[:nfs][:host]}"
-      system("ssh #{nfs} -i insecure_key 'sudo shutdown -h now'")
+      system("ssh #{nfs} -i #{@insecure_key} 'sudo shutdown -h now'")
     end
 
     def halt_staging

@@ -3,11 +3,13 @@ require 'fileutils'
 module Cluster
   class Deployer
     def initialize(project, configure, options = {})
-      @staging    = configure.staging
-      @production = configure.production
-      @deploy     = configure.deploy
-      @project    = File.expand_path(@deploy[:repository] || project)
-      @options    = options
+      @root         = configure.root_path
+      @staging      = configure.staging
+      @production   = configure.production
+      @deploy       = configure.deploy
+      @insecure_key = configure.key_path
+      @project      = File.expand_path(@deploy[:repository] || project)
+      @options      = options
     end
 
     def deploy
@@ -37,11 +39,11 @@ module Cluster
     def test_passed?
       remote = deploy_node(@staging)
       path   = @deploy[:path]
-      system("ssh -i insecure_key #{remote} 'cd #{path} && #{@deploy[:test_cmd]}'")
-      results_dir = './.cluster'
+      system("ssh -i #{@insecure_key} #{remote} 'cd #{path} && #{@deploy[:test_cmd]}'")
+      results_dir = File.join(@root, '.cluster')
       FileUtils.mkdir(results_dir) unless File.exist?(results_dir)
       FileUtils.rm_f(File.join(results_dir, '*'))
-      system("scp -i insecure_key #{remote}:#{File.join(path, 'rank*_output.xml')} #{results_dir}")
+      system("scp -i #{@insecure_key} #{remote}:#{File.join(path, 'rank*_output.xml')} #{results_dir}")
       XmlParser.parse(results_dir)
     end
 
@@ -90,7 +92,7 @@ EOS
 
     def ssh_options(production = false)
       ssh_opts = @deploy[:ssh_opts] || ''
-      ssh_opts << ' -i insecure_key'
+      ssh_opts << " -i #{@insecure_key}"
       ssh_opts
     end
 

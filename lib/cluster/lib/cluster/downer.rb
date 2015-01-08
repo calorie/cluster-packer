@@ -6,8 +6,7 @@ module Cluster
     end
 
     def down
-      res = nfs
-      mpi if res
+      mpi if nfs
     end
 
     def nfs

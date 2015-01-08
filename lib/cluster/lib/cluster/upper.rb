@@ -6,9 +6,9 @@ module Cluster
     end
 
     def up
-      res = nfs
-      res = mpi if res
-      network if res
+      r = nfs
+      r = mpi if r
+      network if r
     end
 
     def nfs

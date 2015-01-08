@@ -1,10 +1,11 @@
 module Cluster
   class Ssh
     def initialize(config, host, opts = [])
-      @config = config.env_config
-      @remote = config.production?
-      @host   = host
-      @opts   = opts.join(' ')
+      @config       = config.env_config
+      @remote       = config.production?
+      @insecure_key = config.key_path
+      @host         = host
+      @opts         = opts.join(' ')
     end
 
     def connect
@@ -12,7 +13,7 @@ module Cluster
     end
 
     def local
-      system("vagrant ssh #{@host} #{@opts} -- -l #{@config[:login_user]} -i insecure_key")
+      system("vagrant ssh #{@host} #{@opts} -- -l #{@config[:login_user]} -i #{@insecure_key}")
     end
 
     def remote
@@ -24,7 +25,7 @@ module Cluster
              n.nil? ? '' : n[:ip]
            end
       target = ip.nil? ? @host : ip.empty? ? nil : "#{user}@#{ip}"
-      return system("ssh #{target} #{@opts} -i insecure_key") unless target.nil?
+      return system("ssh #{target} #{@opts} -i #{@insecure_key}") unless target.nil?
       puts "`#{@host}` is not found."
       false
     end

@@ -1,44 +1,51 @@
+require 'yaml'
+require 'erb'
+
 module Cluster
   class Configure
     attr_reader :config
     attr_writer :is_production
 
-    CONFIG_FILE = 'config.yml'
+    CONFIG_FILE  = 'config.yml'
+    KEY_FILE     = 'insecure_key'
+    CHEF_REPO    = 'chef-repo'
+    VAGRANT_FILE = 'Vagrantfile'
+    PACKER_NFS   = 'packer-nfs.json'
+    PACKER_MPI   = 'packer-mpi.json'
 
     def initialize
-      @config = YAML.load_file(CONFIG_FILE) if config?
+      @root   = Dir.pwd
+      @config = YAML.load_file(config_path) if config?
       @config[:staging][:login_user]    ||= 'mpi'
       @config[:production][:login_user] ||= 'mpi'
     end
 
-    def config?
-      return true if File.exist?(CONFIG_FILE) || example?
-      puts "#{CONFIG_FILE} is not found."
-      exit 1
+    def root_path
+      @root
     end
 
-    def example?
-      while true
-        print "Would you like to use #{CONFIG_FILE}.example? [y|n]:"
-        case STDIN.gets
-        when /\A[yY]/
-          example
-          return true
-        when /\A[nN]/
-          return false
-        end
-      end
+    def config_path
+      File.join(@root, CONFIG_FILE)
     end
 
-    def example
-      templates = File.join(File.dirname(__FILE__), 'templates')
-      template = File.join(templates, "#{CONFIG_FILE}.example")
-      unless File.exist?(template)
-        puts "#{template} is not found."
-        exit 1
-      end
-      erb = ERB.new(File.read(template))
-      File.write(CONFIG_FILE, erb.result)
+    def key_path
+      File.join(@root, KEY_FILE)
+    end
+
+    def chef_repo
+      File.join(@root, CHEF_REPO)
+    end
+
+    def vagrant_file
+      File.join(@root, VAGRANT_FILE)
+    end
+
+    def packer_nfs
+      File.join(@root, PACKER_NFS)
+    end
+
+    def packer_mpi
+      File.join(@root, PACKER_MPI)
     end
 
     def env_config
@@ -76,6 +83,38 @@ module Cluster
 
     def data
       File.join(home, 'data')
+    end
+
+    private
+
+    def config?
+      return true if File.exist?(config_path) || example?
+      puts "#{config_path} is not found."
+      exit 1
+    end
+
+    def example?
+      while true
+        print "Would you like to use #{CONFIG_FILE}.example? [y|n]:"
+        case STDIN.gets
+        when /\A[yY]/
+          example
+          return true
+        when /\A[nN]/
+          return false
+        end
+      end
+    end
+
+    def example
+      templates = File.join(File.dirname(__FILE__), 'templates')
+      template = File.join(templates, "#{CONFIG_FILE}.example")
+      unless File.exist?(template)
+        puts "#{template} is not found."
+        exit 1
+      end
+      erb = ERB.new(File.read(template))
+      File.write(config_path, erb.result)
     end
   end
 end

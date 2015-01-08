@@ -3,12 +3,13 @@ require 'json'
 module Cluster
   class Network
     def initialize(configure, options)
-      @config  = configure.env_config
-      @network = configure.network || {}
-      @options = options
-      @user    = @config[:login_user]
-      @data    = configure.data
-      @scripts = File.join(@data, 'scripts')
+      @config       = configure.env_config
+      @network      = configure.network || {}
+      @data         = configure.data
+      @insecure_key = configure.key_path
+      @user         = @config[:login_user]
+      @scripts      = File.join(@data, 'scripts')
+      @options      = options
     end
 
     def up_production
@@ -20,7 +21,7 @@ module Cluster
           host: node[:host],
         }
       end
-      ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+      ENV['PDSH_SSH_ARGS'] ||= "-i #{@insecure_key} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
       run_scripts(nfs, mpi_hashes)
     end
 
@@ -35,7 +36,7 @@ module Cluster
           host: j['Config']['Hostname'],
         }
       end.compact
-      ENV['PDSH_SSH_ARGS'] ||= '-i insecure_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+      ENV['PDSH_SSH_ARGS'] ||= "-i #{@insecure_key} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
       nfs = @config[:nfs][:dummy] ? 'nfs-dummy' : 'nfs'
       run_scripts(nfs, mpi_hashes)
     end
@@ -44,19 +45,19 @@ module Cluster
 
     def run_scripts(nfs, mpi_hashes)
       remotes = mpi_hashes.map { |h| h[:ip] || h[:host] }.join(',')
-      res = cleanup(nfs)
-      res = mount(remotes) if res
-      res = copy_ssh_files(remotes) if res
-      res = setup_ssh(mpi_hashes) if res
-      res ? make_hostfile(nfs) : false
+      r = cleanup(nfs)
+      r = mount(remotes)          if r
+      r = copy_ssh_files(remotes) if r
+      r = setup_ssh(mpi_hashes)   if r
+      r ? make_hostfile(nfs) : false
     end
 
     def cleanup(nfs)
       cleanup_sh = File.join(@scripts, 'cleanup.sh')
       if @options[:production]
-        system("ssh #{nfs} -i insecure_key '#{cleanup_sh}'")
+        system("ssh #{nfs} -i #{@insecure_key} '#{cleanup_sh}'")
       else
-        system("vagrant ssh #{nfs} -c '#{cleanup_sh}' -- -l #{@user} -i insecure_key")
+        system("vagrant ssh #{nfs} -c '#{cleanup_sh}' -- -l #{@user} -i #{@insecure_key}")
       end
     end
 
@@ -109,9 +110,9 @@ EOS
     def make_hostfile(nfs)
       make_hostfile_sh = File.join(@scripts, 'make_hostfile.sh')
       if @options[:production]
-        system("ssh #{nfs} -i insecure_key '#{make_hostfile_sh}'")
+        system("ssh #{nfs} -i #{@insecure_key} '#{make_hostfile_sh}'")
       else
-        system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}' -- -l #{@user} -i insecure_key")
+        system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}' -- -l #{@user} -i #{@insecure_key}")
       end
     end
   end

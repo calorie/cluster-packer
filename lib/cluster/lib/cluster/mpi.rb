@@ -3,8 +3,11 @@ require 'fileutils'
 module Cluster
   class Mpi
     def initialize(configure, options)
-      @config  = configure.env_config
-      @options = options
+      @root         = configure.root_path
+      @config       = configure.env_config
+      @chef_repo    = configure.chef_repo
+      @insecure_key = configure.key_path
+      @options      = options
     end
 
     def up_production
@@ -15,7 +18,7 @@ module Cluster
         create_json(user, host)
         "#{user}@#{host}"
       end
-      system("cd chef-repo && (echo #{remotes.join(' ')} | xargs -P #{remotes.count} -n 1 bundle exec knife solo bootstrap) && cd ..")
+      system("cd #{@chef_repo} && (echo #{remotes.join(' ')} | xargs -P #{remotes.count} -n 1 bundle exec knife solo bootstrap) && cd #{@root}")
     end
 
     def up_staging
@@ -27,7 +30,7 @@ module Cluster
       mpi     = @config[:mpi]
       user    = @config[:login_user]
       remotes = mpi.map { |node| node[:ip] || node[:host] }.join(',')
-      system("pdsh -R ssh -l #{user} -w #{remotes} -i insecure_key 'sudo shutdown -h now'")
+      system("pdsh -R ssh -l #{user} -w #{remotes} -i #{@insecure_key} 'sudo shutdown -h now'")
     end
 
     def halt_staging
@@ -38,7 +41,7 @@ module Cluster
     private
 
     def create_json(user, host)
-      nodes_dir = File.join('chef-repo', 'nodes')
+      nodes_dir = File.join(@chef_repo, 'nodes')
       host_json = File.join(nodes_dir, "#{host}.json")
       return true if File.exist?(host_json) && host != 'mpi'
 

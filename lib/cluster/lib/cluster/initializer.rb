@@ -6,8 +6,14 @@ require 'erb'
 module Cluster
   class Initializer
     def initialize(configure, options = {})
-      @config  = configure.env_config
-      @options = options
+      @root         = configure.root_path
+      @config       = configure.env_config
+      @insecure_key = configure.key_path
+      @chef_repo    = configure.chef_repo
+      @vagrantfile  = configure.vagrant_file
+      @packer_nfs   = configure.packer_nfs
+      @packer_mpi   = configure.packer_mpi
+      @options      = options
     end
 
     def bootstrap
@@ -18,16 +24,15 @@ module Cluster
     end
 
     def insecure_key
-      insecure_key_path = 'insecure_key'
-      FileUtils.rm_rf(insecure_key_path) if @options[:force]
-      return if File.exist?(insecure_key_path)
+      FileUtils.rm_rf(@insecure_key) if @options[:force]
+      return if File.exist?(@insecure_key)
       response = curl('https://raw.githubusercontent.com/phusion/baseimage-docker/master/image/insecure_key')
-      File.write(insecure_key_path, response.body)
-      FileUtils.chmod(0600, insecure_key_path)
+      File.write(@insecure_key, response.body)
+      FileUtils.chmod(0600, @insecure_key)
     end
 
     def cookbooks
-      cookbooks_path = File.join('chef-repo', 'cookbooks')
+      cookbooks_path = File.join(@chef_repo, 'cookbooks')
       FileUtils.rm_rf(cookbooks_path) if @options[:force]
       unless File.exist?(cookbooks_path)
         system("bundle exec berks vendor #{cookbooks_path}")
@@ -35,8 +40,7 @@ module Cluster
     end
 
     def vagrantfile
-      vagrantfile_path = 'Vagrantfile'
-      return if File.exist?(vagrantfile_path) && !@options[:force]
+      return if File.exist?(@vagrantfile) && !@options[:force]
       templates = File.join(File.dirname(__FILE__), 'templates')
       template = File.join(templates, 'Vagrantfile.erb')
       unless File.exist?(template)
@@ -45,7 +49,7 @@ module Cluster
       end
       _config = @config
       erb     = ERB.new(File.read(template))
-      File.write(vagrantfile_path, erb.result(binding))
+      File.write(@vagrantfile, erb.result(binding))
     end
 
     def packer
@@ -77,7 +81,7 @@ module Cluster
       return if !@options[:force] && image?(repo, tag)
       vars = " -var 'tag=#{tag}'"
       vars << " -var 'user=#{@config[:login_user]}'"
-      run_packer('packer-mpi.json', vars)
+      run_packer(@packer_mpi, vars)
     end
 
     def packer_nfs
@@ -86,7 +90,7 @@ module Cluster
       return if !@options[:force] && image?(repo, tag)
       vars = "-var 'tag=#{tag}'"
       vars << " -var 'user=#{@config[:login_user]}'"
-      run_packer('packer-nfs.json', vars)
+      run_packer(@packer_nfs, vars)
     end
 
     def run_packer(json, vars = '')
