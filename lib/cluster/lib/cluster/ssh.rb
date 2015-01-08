@@ -12,7 +12,7 @@ module Cluster
     end
 
     def local
-      system("vagrant ssh #{@host} #{@opts}")
+      system("vagrant ssh #{@host} #{@opts} -- -l #{@config[:login_user]} -i insecure_key")
     end
 
     def remote

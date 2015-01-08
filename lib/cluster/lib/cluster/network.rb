@@ -56,7 +56,7 @@ module Cluster
       if @options[:production]
         system("ssh #{nfs} -i insecure_key '#{cleanup_sh}'")
       else
-        system("vagrant ssh #{nfs} -c '#{cleanup_sh}'")
+        system("vagrant ssh #{nfs} -c '#{cleanup_sh}' -- -l #{@user} -i insecure_key")
       end
     end
 
@@ -64,6 +64,7 @@ module Cluster
       system <<-EOS
 pdsh -R ssh -l #{@user} -w #{remotes} '
 if ! mountpoint -q #{@data} ; then
+  sudo rpcbind start
   sudo mount -t nfs -o rw,proto=tcp,port=2049 #{@config[:nfs][:ip]}:#{@data} #{@data}
 fi
 '
@@ -110,7 +111,7 @@ EOS
       if @options[:production]
         system("ssh #{nfs} -i insecure_key '#{make_hostfile_sh}'")
       else
-        system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}'")
+        system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}' -- -l #{@user} -i insecure_key")
       end
     end
   end

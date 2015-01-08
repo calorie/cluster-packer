@@ -9,10 +9,12 @@
 
 include_recipe 'nfs::server'
 
-mount_dir = node['nfs']['mount_dir']
+mount_dir   = node['nfs']['mount_dir']
+configs_dir = File.join(mount_dir, 'configs')
+keys_dir    = File.join(mount_dir, 'keys')
 scripts_dir = File.join(mount_dir, 'scripts')
 
-[mount_dir, scripts_dir].each do |d|
+[mount_dir, configs_dir, keys_dir, scripts_dir].each do |d|
   directory d do
     owner node['nfs']['user']
     group node['nfs']['user']
