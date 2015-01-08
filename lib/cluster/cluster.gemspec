@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.name = "cluster"
-  s.version = "0.0.1"
+  s.version = "0.9.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["YuuShigetani"]
-  s.date = "2014-06-14"
+  s.date = "2015-01-09"
   s.description = "cluster"
   s.email = "s2g4t1n2@gmail.com"
   s.executables = ["cluster"]
@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
   ]
   s.files += Dir['lib/**/*']
   s.files += Dir['spec/**/*']
-  s.homepage = "http://github.com/calorie/cluster"
+  s.homepage = "http://github.com/calorie/cluster-packer"
   s.licenses = ["MIT"]
-  s.rubygems_version = "2.2.2"
+  s.rubygems_version = "2.4.5"
   s.summary = "cluster"
 
   if s.respond_to? :specification_version then
@@ -42,4 +42,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, [">= 0"])
   end
 end
-
