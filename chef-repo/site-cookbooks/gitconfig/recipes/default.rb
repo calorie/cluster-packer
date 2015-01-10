@@ -2,9 +2,9 @@
 # Cookbook Name:: gitconfig
 # Recipe:: default
 #
-# Copyright 2014, YOUR_COMPANY_NAME
+# Copyright 2014-2015, Yuu Shigetani
 #
-# All rights reserved - Do Not Redistribute
+# MIT License.
 #
 
 template '/etc/gitconfig' do

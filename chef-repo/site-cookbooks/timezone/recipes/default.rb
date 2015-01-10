@@ -7,24 +7,22 @@
 # Apache 2.0 License.
 #
 
-
 if node['platform_family'] == 'debian'
   # Make sure it's installed. It would be a pretty broken system
   # that didn't have it.
-  package "tzdata"
+  package 'tzdata'
 
-  template "/etc/timezone" do
-    source "timezone.conf.erb"
-    owner 'root'
-    group 'root'
-    mode 0644
+  template '/etc/timezone' do
+    source   'timezone.conf.erb'
+    owner    'root'
+    group    'root'
+    mode     0644
     notifies :run, 'bash[dpkg-reconfigure tzdata]'
   end
 
   bash 'dpkg-reconfigure tzdata' do
-    user 'root'
-    code "/usr/sbin/dpkg-reconfigure -f noninteractive tzdata"
+    user   'root'
+    code   '/usr/sbin/dpkg-reconfigure -f noninteractive tzdata'
     action :nothing
   end
-
 end

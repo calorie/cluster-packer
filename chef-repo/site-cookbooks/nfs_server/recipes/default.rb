@@ -2,9 +2,9 @@
 # Cookbook Name:: nfs_server
 # Recipe:: default
 #
-# Copyright 2014, YOUR_COMPANY_NAME
+# Copyright 2014-2015, Yuu Shigetani
 #
-# All rights reserved - Do Not Redistribute
+# MIT License.
 #
 
 include_recipe 'nfs::server'
