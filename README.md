@@ -23,6 +23,7 @@ $ cluster init
 ## Usage
 
 ```
+$ cluster help
 $ cluster up
 $ cluster deploy -s
 $ cluster halt
