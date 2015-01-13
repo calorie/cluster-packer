@@ -15,9 +15,8 @@ module Cluster
 
     def initialize
       @root   = Dir.pwd
-      @config = YAML.load_file(config_path) if config?
-      @config[:staging][:login_user]    ||= 'mpi'
-      @config[:production][:login_user] ||= 'mpi'
+      config = YAML.load_file(config_path) if config?
+      @config = merge_default(config)
     end
 
     def root_path
@@ -115,6 +114,13 @@ module Cluster
       end
       erb = ERB.new(File.read(template))
       File.write(config_path, erb.result)
+    end
+
+    def merge_default(config)
+      config[:staging][:login_user]    ||= 'mpi'
+      config[:production][:login_user] ||= 'mpi'
+      config[:deploy][:test] = config[:deploy][:test].nil? ? true : config[:deploy][:test]
+      config
     end
   end
 end

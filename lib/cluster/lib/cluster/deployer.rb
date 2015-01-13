@@ -37,6 +37,7 @@ module Cluster
     end
 
     def test_passed?
+      return true if skip_tests?
       remote = deploy_node(@staging)
       path   = @deploy[:path]
       system("ssh -i #{@insecure_key} #{remote} 'cd #{path} && #{@deploy[:test_cmd]}'")
@@ -108,6 +109,10 @@ EOS
         end
       end
       true
+    end
+
+    def skip_tests?
+      !@options[:test] || !@deploy[:test]
     end
   end
 end

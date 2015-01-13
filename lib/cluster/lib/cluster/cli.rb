@@ -57,6 +57,7 @@ module Cluster
 
     desc 'deploy [PROJECT_PATH]', 'Deploy project'
     method_option :staging, type: :boolean, aliases: '-s', banner: 'Deploy to staging'
+    method_option :test, type: :boolean, aliases: '-t', banner: 'Execute tests', default: true
     def deploy(project = '.')
       d = Deployer.new(project, @@configure, options)
       d.deploy
