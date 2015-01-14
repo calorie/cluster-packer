@@ -65,7 +65,6 @@ module Cluster
       system <<-EOS
 pdsh -R ssh -l #{@user} -w #{remotes} '
 if ! mountpoint -q #{@data} ; then
-  sudo rpcbind start
   sudo mount -t nfs -o rw,proto=tcp,port=2049 #{@config[:nfs][:ip]}:#{@data} #{@data}
 fi
 '
