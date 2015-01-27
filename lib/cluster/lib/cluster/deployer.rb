@@ -92,9 +92,7 @@ EOS
     end
 
     def ssh_options(production = false)
-      ssh_opts = @deploy[:ssh_opts] || ''
-      ssh_opts << " -i #{@insecure_key}"
-      ssh_opts
+      "#{@deploy[:ssh_opts]} -i #{@insecure_key}"
     end
 
     def valid_project?(project)

@@ -16,7 +16,7 @@ module Cluster
     def initialize
       @root   = Dir.pwd
       config = YAML.load_file(config_path) if config?
-      @config = merge_default(config)
+      @config = default.deep_merge(config)
     end
 
     def root_path
@@ -84,6 +84,26 @@ module Cluster
       File.join(home, 'data')
     end
 
+    def default
+      {
+        staging: {
+          node_num: 1,
+          login_user: 'mpi',
+          nfs: {
+            dummy: true,
+          },
+        },
+        production: {
+          login_user: 'mpi',
+          mpi: [],
+        },
+        deploy: {
+          ssh_opts: '',
+          test: true,
+        },
+      }
+    end
+
     private
 
     def config?
@@ -114,13 +134,6 @@ module Cluster
       end
       erb = ERB.new(File.read(template))
       File.write(config_path, erb.result)
-    end
-
-    def merge_default(config)
-      config[:staging][:login_user]    ||= 'mpi'
-      config[:production][:login_user] ||= 'mpi'
-      config[:deploy][:test] = config[:deploy][:test].nil? ? true : config[:deploy][:test]
-      config
     end
   end
 end

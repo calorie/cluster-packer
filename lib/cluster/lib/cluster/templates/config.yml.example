@@ -1,8 +1,5 @@
 :staging:
   :node_num: 4
-  :nfs:
-    :dummy: true
-    :ip: '192.168.33.10'
 :production:
   :setup_user: 'pi'
   :nfs:
