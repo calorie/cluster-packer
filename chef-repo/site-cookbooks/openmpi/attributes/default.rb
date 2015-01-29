@@ -12,7 +12,4 @@ default['openmpi']['conf_opts'] = %w{
   --with-devel-headers
 }
 default['openmpi']['make_opts'] = []
-default['openmpi']['dependencies'] = %w{
-  autotools-dev
-  automake
-}
+default['openmpi']['dependencies'] = %w(autotools-dev automake)
