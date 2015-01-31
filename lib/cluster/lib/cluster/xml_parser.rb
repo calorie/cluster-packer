@@ -1,15 +1,12 @@
 module Cluster
   class XmlParser
     def self.parse(dir)
-      results = []
-      Dir.glob(File.join(dir, '*.xml')).each do |file|
-        next unless valid_xml?(file)
-        xml = File.read(file)
-        xml_obj = Mpispec::Behaviour.parse(xml)
-        next unless xml_obj.respond_to?(:describe)
-        results << pass_tests?(xml_obj.describe)
-      end
-      pass_all?(results)
+      file = File.join(dir, 'output.xml')
+      return false unless File.exist(file)
+      xml = File.read(file)
+      xml_obj = Mpispec::Behaviour.parse(xml)
+      return false unless xml_obj.respond_to?(:describe)
+      pass_tests?(xml_obj.describe)
     end
 
     private
@@ -28,15 +25,6 @@ module Cluster
         end
       end
       true
-    end
-
-    def self.pass_all?(results = [])
-      return false if results.empty?
-      !results.include?(false)
-    end
-
-    def self.valid_xml?(file)
-      File.basename(file) =~ /\Arank\d+_output\.xml\z/
     end
   end
 end
