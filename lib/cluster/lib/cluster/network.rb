@@ -76,11 +76,17 @@ EOS
     end
 
     def setup_ssh(ip_and_host_maps)
+      return setup_linking_all_hosts(ip_and_host_maps) if @network.nil? || @network.empty?
       hosts = ip_and_host_maps.map { |h| h[:host] }
       ip_and_host_maps.each do |r|
         return false unless setup_linking_hosts(r[:host], hosts, ip_and_host_maps)
       end
       true
+    end
+
+    def setup_linking_all_hosts(ip_and_host_maps)
+      ips_or_hosts = ip_and_host_maps.map { |h| h[:ip] || h[:host] }
+      link_hosts(ips_or_hosts.join(','))
     end
 
     def setup_linking_hosts(host, hosts, ip_and_host_maps)
@@ -91,7 +97,7 @@ EOS
           remote_hash = ip_and_host_maps.find { |m| m[:host] == h }
           remote_hash[:ip] || remote_hash[:host]
         end
-        return false unless link_hosts(host, linked_ips_or_hosts.join(','))
+        return false unless link_hosts(linked_ips_or_hosts.join(','), host)
       else
         puts 'Please specify `host` in the config file.' if host.nil?
         if !linked_hosts.is_a?(Array) || linked_hosts.empty?
@@ -102,7 +108,7 @@ EOS
       true
     end
 
-    def link_hosts(host, remotes)
+    def link_hosts(remotes, host = nil)
       system("pdsh -R ssh -l #{@user} -w #{remotes} '#{File.join(@scripts, 'setup_ssh.sh')} #{host}'")
     end
 
