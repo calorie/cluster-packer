@@ -30,6 +30,7 @@ module Cluster
     method_option :mpi,        type: :boolean, aliases: '-m', banner: 'Boot MPI nodes'
     method_option :connection, type: :boolean, aliases: '-c', banner: 'Setup connection'
     def up
+      invoke(:init, [], vagrant: true, force: true)
       @@configure.is_production = options[:production]
       u = Upper.new(@@configure, options)
       if up_all?(options)
