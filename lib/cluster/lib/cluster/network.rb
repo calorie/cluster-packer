@@ -10,6 +10,7 @@ module Cluster
       @user         = @config[:login_user]
       @scripts      = File.join(@data, 'scripts')
       @options      = options
+      ENV['PDSH_SSH_ARGS'] ||= default_pdsh_ssh_args
     end
 
     def up_production
@@ -21,7 +22,6 @@ module Cluster
           host: node[:host],
         }
       end
-      ENV['PDSH_SSH_ARGS'] ||= "-i #{@insecure_key} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
       run_scripts(nfs, mpi_hashes)
     end
 
@@ -36,15 +36,18 @@ module Cluster
           host: j['Config']['Hostname'],
         }
       end.compact
-      ENV['PDSH_SSH_ARGS'] ||= "-i #{@insecure_key} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
       nfs = @config[:nfs][:dummy] ? 'nfs-dummy' : 'nfs'
       run_scripts(nfs, mpi_hashes)
     end
 
     private
 
+    def default_pdsh_ssh_args
+      "-i #{@insecure_key} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    end
+
     def run_scripts(nfs, mpi_hashes)
-      remotes = mpi_hashes.map { |h| h[:ip] || h[:host] }.join(',')
+      remotes = mpi_hashes_to_remotes(mpi_hashes)
       r = cleanup(nfs)
       r = mount(remotes)          if r
       r = copy_ssh_files(remotes) if r
@@ -75,32 +78,31 @@ EOS
       system("pdsh -R ssh -l #{@user} -w #{remotes} '#{File.join(@scripts, 'copy_ssh_files.sh')}'")
     end
 
-    def setup_ssh(ip_and_host_maps)
-      return setup_linking_all_hosts(ip_and_host_maps) if @network.nil? || @network.empty?
-      hosts = ip_and_host_maps.map { |h| h[:host] }
-      ip_and_host_maps.each do |r|
-        return false unless setup_linking_hosts(r[:host], hosts, ip_and_host_maps)
+    def setup_ssh(mpi_hashes)
+      return setup_linking_all_hosts(mpi_hashes) if @network.nil? || @network.empty?
+      hosts = mpi_hashes.map { |h| h[:host] }
+      mpi_hashes.each do |r|
+        return false unless setup_linking_hosts(r[:host], mpi_hashes)
       end
       true
     end
 
-    def setup_linking_all_hosts(ip_and_host_maps)
-      ips_or_hosts = ip_and_host_maps.map { |h| h[:ip] || h[:host] }
-      link_hosts(ips_or_hosts.join(','))
+    def setup_linking_all_hosts(mpi_hashes)
+      link_hosts(mpi_hashes_to_remotes(mpi_hashes))
     end
 
-    def setup_linking_hosts(host, hosts, ip_and_host_maps)
-      linked_hosts = @network[host.to_sym] || hosts
-      if linked_hosts.is_a?(Array) && !linked_hosts.empty? && !host.nil?
-        linked_hosts << host
-        linked_ips_or_hosts = linked_hosts.map do |h|
-          remote_hash = ip_and_host_maps.find { |m| m[:host] == h }
-          remote_hash[:ip] || remote_hash[:host]
-        end
-        return false unless link_hosts(linked_ips_or_hosts.join(','), host)
+    def setup_linking_hosts(host, mpi_hashes)
+      hosts = @network[host.to_sym]
+      if hosts.is_a?(Array) && !hosts.empty? && !host.nil?
+        hosts << host
+        remotes = hosts.map do |h|
+          mpi_hash = mpi_hashes.find { |m| m[:host] == h }
+          mpi_hash[:ip] || mpi_hash[:host]
+        end.join(',')
+        return false unless link_hosts(remotes, host)
       else
         puts 'Please specify `host` in the config file.' if host.nil?
-        if !linked_hosts.is_a?(Array) || linked_hosts.empty?
+        if !hosts.is_a?(Array) || hosts.empty?
           puts 'Please specify networking hosts with Array in the config file.'
         end
         return false
@@ -119,6 +121,10 @@ EOS
       else
         system("vagrant ssh #{nfs} -c '#{make_hostfile_sh}' -- -l #{@user} -i #{@insecure_key}")
       end
+    end
+
+    def mpi_hashes_to_remotes(mpi_hashes)
+      mpi_hashes.map { |h| h[:ip] || h[:host] }.join(',')
     end
   end
 end
