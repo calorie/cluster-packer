@@ -23,6 +23,14 @@ module Cluster
       packer
     end
 
+    def local_env
+      chef_solo?
+      cookbooks
+      solo = File.join(@chef_repo, 'solo.rb')
+      json = File.join(@chef_repo, 'nodes', 'localhost.json')
+      system("cd #{@chef_repo} && sudo chef-solo -c #{solo} -j #{json} && cd #{@root}")
+    end
+
     def insecure_key
       FileUtils.rm_rf(@insecure_key) if @options[:force]
       return if File.exist?(@insecure_key)
@@ -53,6 +61,8 @@ module Cluster
     end
 
     def packer
+      docker?
+      packer?
       packer_mpi
       packer_nfs if @config[:nfs][:dummy]
     end

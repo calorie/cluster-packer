@@ -9,6 +9,7 @@ cookbooks
 vendor/bundle
 *.log
 chef-repo/nodes/*.json
+!chef-repo/nodes/localhost.json
 !chef-repo/nodes/mpi.json
 !chef-repo/nodes/nfs.json
 config.yml

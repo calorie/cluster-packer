@@ -25,6 +25,10 @@ module Cluster
       command?('packer')
     end
 
+    def chef_solo?
+      command?('chef-solo')
+    end
+
     private
 
     def command?(command)

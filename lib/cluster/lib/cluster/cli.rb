@@ -8,6 +8,7 @@ module Cluster
 
     desc 'init', 'Initialize cluster'
     method_option :force,     type: :boolean, aliases: '-f', banner: 'Force flag'
+    method_option :local,     type: :boolean, aliases: '-l', banner: 'Install requirements'
     method_option :key,       type: :boolean, aliases: '-k', banner: 'Download insecure_key'
     method_option :cookbooks, type: :boolean, aliases: '-c', banner: 'Download cookbooks'
     method_option :vagrant,   type: :boolean, aliases: '-v', banner: 'Create Vagrantfile'
@@ -15,14 +16,12 @@ module Cluster
     def init
       @@configure.is_production = options[:production]
       i = Initializer.new(@@configure, options)
-      if init_all?(options)
-        i.bootstrap
-      else
-        i.insecure_key if options[:key]
-        i.cookbooks    if options[:cookbooks]
-        i.vagrantfile  if options[:vagrant]
-        i.packer       if options[:image]
-      end
+      return i.bootstrap if init_all?(options)
+      i.local_env    if options[:local]
+      i.insecure_key if options[:key]
+      i.cookbooks    if options[:cookbooks]
+      i.vagrantfile  if options[:vagrant]
+      i.packer       if options[:image]
     end
 
     desc 'up', 'Boot cluster'
@@ -33,13 +32,10 @@ module Cluster
       invoke(:init, [], vagrant: true, force: true)
       @@configure.is_production = options[:production]
       u = Upper.new(@@configure, options)
-      if up_all?(options)
-        u.up
-      else
-        u.nfs     if options[:nfs]
-        u.mpi     if options[:mpi]
-        u.network if options[:connection]
-      end
+      return u.up if up_all?(options)
+      u.nfs     if options[:nfs]
+      u.mpi     if options[:mpi]
+      u.network if options[:connection]
     end
 
     desc 'halt', 'Halt cluster'
@@ -48,12 +44,9 @@ module Cluster
     def halt
       @@configure.is_production = options[:production]
       d = Downer.new(@@configure, options)
-      if down_all?(options)
-        d.down
-      else
-        d.nfs if options[:nfs]
-        d.mpi if options[:mpi]
-      end
+      return d.down if down_all?(options)
+      d.nfs if options[:nfs]
+      d.mpi if options[:mpi]
     end
 
     desc 'deploy [PROJECT_PATH]', 'Deploy project'
@@ -71,26 +64,34 @@ module Cluster
       ssh.connect
     end
 
-    before_method(*instance_methods(false)) do
+    before_method(*instance_methods(false)) do |n|
+      @@configure = Configure.new
+    end
+
+    before_method(*(instance_methods(false) - %i(init))) do
       docker?
       pdsh?
       vagrant?
       packer?
-      @@configure = Configure.new
     end
 
     private
 
     def init_all?(options)
-      !options[:key] && !options[:vagrant] && !options[:cookbooks] && !options[:image]
+      options?(options, %i(key vagrant cookbooks image local))
     end
 
     def up_all?(options)
-      !options[:nfs] && !options[:mpi] && !options[:connection]
+      options?(options, %i(nfs mpi connection))
     end
 
     def down_all?(options)
-      !options[:nfs] && !options[:mpi]
+      options?(options, %i(nfs mpi))
+    end
+
+    def options?(options, keys)
+      keys.each { |key| return false if options[key] }
+      true
     end
   end
 end
