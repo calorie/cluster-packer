@@ -2,7 +2,7 @@ require 'thor'
 
 module Cluster
   class Cli < Thor
-    include Cluster::Base
+    include Validator
 
     class_option :production, type: :boolean, default: false, aliases: '-p', banner: 'Flag of production'
 
@@ -14,8 +14,7 @@ module Cluster
     method_option :vagrant,   type: :boolean, aliases: '-v', banner: 'Create Vagrantfile'
     method_option :image,     type: :boolean, aliases: '-i', banner: 'Create images of containers'
     def init
-      @@configure.is_production = options[:production]
-      i = Initializer.new(@@configure, options)
+      i = Initializer.new(@configure, options)
       return i.bootstrap if init_all?(options)
       i.local_env    if options[:local]
       i.insecure_key if options[:key]
@@ -30,8 +29,7 @@ module Cluster
     method_option :connection, type: :boolean, aliases: '-c', banner: 'Setup connection'
     def up
       invoke(:init, [], vagrant: true, force: true)
-      @@configure.is_production = options[:production]
-      u = Upper.new(@@configure, options)
+      u = Upper.new(@configure, options)
       return u.up if up_all?(options)
       u.nfs     if options[:nfs]
       u.mpi     if options[:mpi]
@@ -42,8 +40,7 @@ module Cluster
     method_option :nfs, type: :boolean, aliases: '-n', banner: 'Halt NFS node'
     method_option :mpi, type: :boolean, aliases: '-m', banner: 'Halt MPI nodes'
     def halt
-      @@configure.is_production = options[:production]
-      d = Downer.new(@@configure, options)
+      d = Downer.new(@configure, options)
       return d.down if down_all?(options)
       d.nfs if options[:nfs]
       d.mpi if options[:mpi]
@@ -53,26 +50,22 @@ module Cluster
     method_option :staging, type: :boolean, aliases: '-s', banner: 'Deploy to staging'
     method_option :test,    type: :boolean, aliases: '-t', banner: 'Execute tests', default: true
     def deploy(project = '.')
-      d = Deployer.new(project, @@configure, options)
+      d = Deployer.new(project, @configure, options)
       d.deploy
     end
 
     desc 'ssh [HOST_NAME] [OPTIONS]', 'Connect to the host'
     def ssh(host, *opts)
-      @@configure.is_production = options[:production]
-      ssh = Ssh.new(@@configure, host, opts)
+      ssh = Ssh.new(@configure, host, opts)
       ssh.connect
     end
 
-    before_method(*instance_methods(false)) do |n|
-      @@configure = Configure.new
-    end
-
-    before_method(*(instance_methods(false) - %i(init))) do
-      docker?
-      pdsh?
-      vagrant?
-      packer?
+    no_commands do
+      def invoke_command(command, *args)
+        @configure = Configure.new(options[:production])
+        check_requirements unless command.name == 'init'
+        super
+      end
     end
 
     private
@@ -90,8 +83,7 @@ module Cluster
     end
 
     def options?(options, keys)
-      keys.each { |key| return false if options[key] }
-      true
+      keys.all? { |key| !options[key] }
     end
   end
 end

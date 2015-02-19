@@ -5,6 +5,8 @@ require 'erb'
 
 module Cluster
   class Initializer
+    include Validator
+
     def initialize(configure, options = {})
       @root         = configure.root_path
       @config       = configure.env_config

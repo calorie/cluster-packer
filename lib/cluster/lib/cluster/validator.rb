@@ -1,10 +1,5 @@
 require 'mkmf'
 
-module MakeMakefile::Logging
-  @logfile = File::NULL
-  @quiet   = true
-end
-
 module Cluster
   module Validator
     module_function
@@ -27,6 +22,13 @@ module Cluster
 
     def chef_solo?
       command?('chef-solo')
+    end
+
+    def check_requirements
+      docker?
+      pdsh?
+      vagrant?
+      packer?
     end
 
     private

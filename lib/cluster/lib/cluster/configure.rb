@@ -4,7 +4,6 @@ require 'erb'
 module Cluster
   class Configure
     attr_reader :config
-    attr_writer :is_production
 
     CONFIG_FILE  = 'config.yml'
     KEY_FILE     = 'insecure_key'
@@ -13,10 +12,11 @@ module Cluster
     PACKER_NFS   = 'packer-nfs.json'
     PACKER_MPI   = 'packer-mpi.json'
 
-    def initialize
-      @root   = Dir.pwd
-      config = YAML.load_file(config_path) if config?
-      @config = default.deep_merge(config)
+    def initialize(production = false)
+      @production = production
+      @root       = Dir.pwd
+      config      = YAML.load_file(config_path) if config?
+      @config     = default.deep_merge(config)
     end
 
     def root_path
@@ -60,7 +60,7 @@ module Cluster
     end
 
     def production?
-      @is_production
+      @production
     end
 
     def deploy

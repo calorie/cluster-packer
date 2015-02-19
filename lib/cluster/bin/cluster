@@ -9,6 +9,4 @@ rescue
   require 'cluster/cli'
 end
 
-include Cluster::Validator
-
 Cluster::Cli.start
